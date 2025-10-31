@@ -564,54 +564,53 @@ const History = ({ allPeriods, userId, categories, rideApps }: any) => {
 };
 
 const LoginScreen = () => {
-    const { auth } = useFirebase();
-    const [email, setEmail] = useState('');
-    const [password, setPassword] = useState('');
-    const [isSignUp, setIsSignUp] = useState(false);
-    const [error, setError] = useState('');
-  
-    const handleAuthAction = async () => {
-      if (!auth || !email || !password) {
-        setError("Please enter email and password.");
-        return;
+  const { auth } = useFirebase();
+  const [email, setEmail] = useState('');
+  const [password, setPassword] = useState('');
+  const [isSignUp, setIsSignUp] = useState(false);
+  const [error, setError] = useState('');
+
+  const handleAuthAction = async () => {
+    if (!auth || !email || !password) {
+      setError("Please enter email and password.");
+      return;
+    }
+    setError('');
+    try {
+      if (isSignUp) {
+        await createUserWithEmailAndPassword(auth, email, password);
+      } else {
+        await signInWithEmailAndPassword(auth, email, password);
       }
-      setError('');
-      try {
-        if (isSignUp) {
-          await createUserWithEmailAndPassword(auth, email, password);
-        } else {
-          await signInWithEmailAndPassword(auth, email, password);
-        }
-        // Auth state change will be handled by the global `useUser` hook.
-      } catch (e: any) {
-        setError(e.message);
-        console.error("Authentication error:", e);
-      }
-    };
-  
-    return (
-      <div className="flex flex-col items-center justify-center min-h-screen -mt-20">
-        <Card className="p-8 w-full max-w-sm">
-          <CardHeader>
-            <CardTitle className="text-2xl text-center">{isSignUp ? 'Create Account' : 'Welcome Back'}</CardTitle>
-            <CardDescription className="text-center">
-              {isSignUp ? 'Enter your email and password to sign up.' : 'Sign in to track your trips and finances.'}
-            </CardDescription>
-          </CardHeader>
-          <CardContent className="space-y-4">
-            {error && <p className="text-red-500 text-sm text-center">{error}</p>}
-            <Input type="email" placeholder="Email" value={email} onChange={(e) => setEmail(e.target.value)} />
-            <Input type="password" placeholder="Password" value={password} onChange={(e) => setPassword(e.target.value)} />
-            <Button onClick={handleAuthAction} className="w-full">
-              {isSignUp ? 'Sign Up' : 'Sign In'}
-            </Button>
-            <Button variant="link" onClick={() => { setIsSignUp(!isSignUp); setError(''); }} className="w-full">
-              {isSignUp ? 'Already have an account? Sign In' : "Don't have an account? Sign Up"}
-            </Button>
-          </CardContent>
-        </Card>
-      </div>
-    );
+    } catch (e: any) {
+      setError(e.message);
+      console.error("Authentication error:", e);
+    }
+  };
+
+  return (
+    <div className="flex flex-col items-center justify-center min-h-screen -mt-20">
+      <Card className="p-8 w-full max-w-sm">
+        <CardHeader>
+          <CardTitle className="text-2xl text-center">{isSignUp ? 'Create Account' : 'Welcome Back'}</CardTitle>
+          <CardDescription className="text-center">
+            {isSignUp ? 'Enter your email and password to sign up.' : 'Sign in to track your trips and finances.'}
+          </CardDescription>
+        </CardHeader>
+        <CardContent className="space-y-4">
+          {error && <p className="text-red-500 text-sm text-center">{error}</p>}
+          <Input type="email" placeholder="Email" value={email} onChange={(e) => setEmail(e.target.value)} />
+          <Input type="password" placeholder="Password" value={password} onChange={(e) => setPassword(e.target.value)} />
+          <Button onClick={handleAuthAction} className="w-full">
+            {isSignUp ? 'Sign Up' : 'Sign In'}
+          </Button>
+          <Button variant="link" onClick={() => { setIsSignUp(!isSignUp); setError(''); }} className="w-full">
+            {isSignUp ? 'Already have an account? Sign In' : "Don't have an account? Sign Up"}
+          </Button>
+        </CardContent>
+      </Card>
+    </div>
+  );
 };
 
 
