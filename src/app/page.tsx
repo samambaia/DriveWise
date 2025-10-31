@@ -2,7 +2,7 @@
 'use client';
 
 import { useState, useEffect, useMemo } from 'react';
-import { useFirebase, useUser } from '@/firebase';
+import { useFirebase, useUser, initiateAnonymousSignIn } from '@/firebase';
 import {
   collection,
   onSnapshot,
@@ -409,7 +409,7 @@ const Settings = ({ categories, rideApps, activePeriod, userId }: any) => {
                       </li>
                     ))}
                   </ul>
-                </CardContent>
+                </CardContent>.
               </Card>
             </div>
         </div>
@@ -551,7 +551,7 @@ const History = ({ allPeriods, userId, categories, rideApps }: any) => {
 // #endregion Components
 
 export default function IDriveApp() {
-  const { firestore } = useFirebase();
+  const { firestore, auth } = useFirebase();
   const { user, isUserLoading } = useUser();
   const [view, setView] = useState('Home');
   
@@ -565,6 +565,13 @@ export default function IDriveApp() {
   const [isRevenueModalOpen, setRevenueModalOpen] = useState(false);
   const [isExpenseModalOpen, setExpenseModalOpen] = useState(false);
   
+  // Handle anonymous sign-in
+  useEffect(() => {
+    if (!isUserLoading && !user && auth) {
+      initiateAnonymousSignIn(auth);
+    }
+  }, [isUserLoading, user, auth]);
+
   // Fetch settings (Categories and RideApps)
   useEffect(() => {
     if (!firestore) return;
@@ -621,13 +628,8 @@ export default function IDriveApp() {
     return () => unsubscribe();
   }, [activePeriod, firestore, user]);
   
-  if (isUserLoading) {
-      return <div>Loading user...</div>
-  }
-
-  if (!user) {
-      // Handle login flow here if needed
-      return <div>Please log in to use the application.</div>
+  if (isUserLoading || !user) {
+      return <div>Loading...</div>
   }
 
   const renderView = () => {
