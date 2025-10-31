@@ -1,0 +1,197 @@
+{
+  "entities": {
+    "Category": {
+      "$schema": "http://json-schema.org/draft-07/schema#",
+      "title": "Category",
+      "type": "object",
+      "description": "Represents a category for expenses.",
+      "properties": {
+        "id": {
+          "type": "string",
+          "description": "Unique identifier for the Category entity."
+        },
+        "name": {
+          "type": "string",
+          "description": "The name of the expense category (e.g., 'Fuel', 'Toll')."
+        }
+      },
+      "required": [
+        "id",
+        "name"
+      ]
+    },
+    "RideApp": {
+      "$schema": "http://json-schema.org/draft-07/schema#",
+      "title": "RideApp",
+      "type": "object",
+      "description": "Represents a ride application.",
+      "properties": {
+        "id": {
+          "type": "string",
+          "description": "Unique identifier for the RideApp entity."
+        },
+        "name": {
+          "type": "string",
+          "description": "The name of the ride application (e.g., 'Uber', '99')."
+        }
+      },
+      "required": [
+        "id",
+        "name"
+      ]
+    },
+    "Period": {
+      "$schema": "http://json-schema.org/draft-07/schema#",
+      "title": "Period",
+      "type": "object",
+      "description": "Represents a financial period with a start date, end date, initial balance, and target balance.",
+      "properties": {
+        "id": {
+          "type": "string",
+          "description": "Unique identifier for the Period entity."
+        },
+        "startDate": {
+          "type": "string",
+          "description": "Timestamp of the period's start date.",
+          "format": "date-time"
+        },
+        "endDate": {
+          "type": "string",
+          "description": "Timestamp of the period's end date.",
+          "format": "date-time"
+        },
+        "initialBalance": {
+          "type": "number",
+          "description": "The initial financial balance at the start of the period."
+        },
+        "targetBalance": {
+          "type": "number",
+          "description": "The target financial balance to be achieved by the end of the period."
+        },
+        "isActive": {
+          "type": "boolean",
+          "description": "Indicates whether the period is currently active."
+        }
+      },
+      "required": [
+        "id",
+        "startDate",
+        "endDate",
+        "initialBalance",
+        "targetBalance",
+        "isActive"
+      ]
+    },
+    "Transaction": {
+      "$schema": "http://json-schema.org/draft-07/schema#",
+      "title": "Transaction",
+      "type": "object",
+      "description": "Represents a financial transaction (revenue or expense).",
+      "properties": {
+        "id": {
+          "type": "string",
+          "description": "Unique identifier for the Transaction entity."
+        },
+        "type": {
+          "type": "string",
+          "description": "The type of transaction ('Revenue' or 'Expense')."
+        },
+        "amount": {
+          "type": "number",
+          "description": "The amount of the transaction."
+        },
+        "description": {
+          "type": "string",
+          "description": "A description of the transaction."
+        },
+        "categoryOrAppId": {
+          "type": "string",
+          "description": "Reference to Category or RideApp. (Relationship: Category 1:N Transaction or RideApp 1:N Transaction)"
+        },
+        "tripCount": {
+          "type": "number",
+          "description": "The number of trips associated with the transaction (only for revenue)."
+        },
+        "periodId": {
+          "type": "string",
+          "description": "Reference to Period. (Relationship: Period 1:N Transaction)"
+        },
+        "timestamp": {
+          "type": "string",
+          "description": "Timestamp of the transaction.",
+          "format": "date-time"
+        }
+      },
+      "required": [
+        "id",
+        "type",
+        "amount",
+        "description",
+        "categoryOrAppId",
+        "periodId",
+        "timestamp"
+      ]
+    }
+  },
+  "auth": {
+    "providers": [
+      "password",
+      "anonymous"
+    ]
+  },
+  "firestore": {
+    "structure": [
+      {
+        "path": "/settings/config",
+        "definition": {
+          "entityName": "config",
+          "schema": {
+            "$ref": "#/backend/entities/Config"
+          },
+          "description": "Stores global configuration settings, including arrays of categories and rideApps. This collection is publicly readable."
+        }
+      },
+      {
+        "path": "/users/{userId}/periods/{periodId}",
+        "definition": {
+          "entityName": "Period",
+          "schema": {
+            "$ref": "#/backend/entities/Period"
+          },
+          "description": "Stores financial periods specific to a user.  Authorization is based on the `userId` path segment.",
+          "params": [
+            {
+              "name": "userId",
+              "description": "The unique identifier of the user."
+            },
+            {
+              "name": "periodId",
+              "description": "The unique identifier of the period."
+            }
+          ]
+        }
+      },
+      {
+        "path": "/users/{userId}/transactions/{transactionId}",
+        "definition": {
+          "entityName": "Transaction",
+          "schema": {
+            "$ref": "#/backend/entities/Transaction"
+          },
+          "description": "Stores financial transactions specific to a user and period. Authorization is based on the `userId` path segment.",
+          "params": [
+            {
+              "name": "userId",
+              "description": "The unique identifier of the user."
+            },
+            {
+              "name": "transactionId",
+              "description": "The unique identifier of the transaction."
+            }
+          ]
+        }
+      }
+    ],
+    "reasoning": "The Firestore structure is designed to ensure authorization independence, clarity, and scalability. User-specific data (Periods and Transactions) are stored under user-specific paths (`/users/{userId}/periods/{periodId}` and `/users/{userId}/transactions/{transactionId}`). This eliminates the need for complex security rules involving `get()` calls to parent documents, thus ensuring atomic operations and easier debugging.  Categories and RideApps are stored in a global collection `/settings` since they are public and shared across all users. To fulfill the 'Rules are not Filters' principle, Transactions are stored inside user document, to allow listing transactions only for an authenticated user. This structure facilitates secure `list` operations because we only allow listing from user-owned collections."
+  }
+}

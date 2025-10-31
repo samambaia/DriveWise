@@ -1,0 +1,100 @@
+/**
+ * @file Firestore Security Rules
+ * @description This ruleset enforces a strict user-ownership model for private data (Periods and Transactions) and allows public read access to shared configuration data (settings).
+ *
+ * Data Structure:
+ * - /settings/config: Contains global configuration data (categories, rideApps) that is publicly readable.
+ * - /users/{userId}/periods/{periodId}: Stores financial periods specific to each user, with access restricted to the owner.
+ * - /users/{userId}/transactions/{transactionId}: Stores transactions for each user, with access restricted to the owner.
+ *
+ * Key Security Decisions:
+ * - User-specific data (Periods and Transactions) are nested under /users/{userId} to simplify authorization.
+ * - Listing of Periods and Transactions is restricted to the owner of the user ID.
+ * - The /settings/config collection is publicly readable.
+ *
+ * Denormalization for Authorization:
+ * - The user ID is implicitly denormalized by nesting data under the /users/{userId} path.  This avoids the need to store and validate a separate userId field within the Period and Transaction documents.
+ */
+rules_version = '2';
+service cloud.firestore {
+  match /databases/{database}/documents {
+
+    /**
+     * @description Grants public read access to the /settings/config document, but restricts write access.
+     * @path /settings/config
+     * @allow get, list: Any user can read the settings.
+     * @deny create, update, delete: No user can create, update, or delete the settings.
+     * @principle Allows public read access to shared configuration data.
+     */
+    match /settings/config {
+      allow get, list: if true;
+      allow create, update, delete: if false;
+    }
+
+    /**
+     * @description Manages access to user-specific period documents. Only the owner can read, create, update, or delete their own periods.
+     * @path /users/{userId}/periods/{periodId}
+     * @allow get, list: Authenticated user can read its own periods.
+     * @allow create: Authenticated user can create period. The periodId must match the document id.
+     * @allow update, delete: Authenticated user can update and delete its own periods.
+     * @deny get, list: Other users cannot read periods from other user.
+     * @deny create: Other users cannot create periods for other users.
+     * @deny update, delete: Other users cannot update and delete periods from other users.
+     * @principle Enforces document ownership for all operations.
+     */
+    match /users/{userId}/periods/{periodId} {
+      allow get: if isSignedIn() && isOwner(userId);
+      allow list: if isSignedIn() && isOwner(userId);
+      allow create: if isSignedIn() && isOwner(userId) && request.resource.id == periodId;
+      allow update: if isSignedIn() && isExistingOwner(userId) && request.resource.data.id == resource.data.id;
+      allow delete: if isSignedIn() && isExistingOwner(userId);
+    }
+
+    /**
+     * @description Manages access to user-specific transaction documents. Only the owner can read, create, update, or delete their own transactions.
+     * @path /users/{userId}/transactions/{transactionId}
+     * @allow get, list: Authenticated user can read its own transactions.
+     * @allow create: Authenticated user can create transaction. The transactionId must match the document id.
+     * @allow update, delete: Authenticated user can update and delete its own transactions.
+     * @deny get, list: Other users cannot read transactions from other user.
+     * @deny create: Other users cannot create transactions for other users.
+     * @deny update, delete: Other users cannot update and delete transactions from other users.
+     * @principle Enforces document ownership for all operations.
+     */
+    match /users/{userId}/transactions/{transactionId} {
+      allow get: if isSignedIn() && isOwner(userId);
+      allow list: if isSignedIn() && isOwner(userId);
+      allow create: if isSignedIn() && isOwner(userId) && request.resource.id == transactionId;
+      allow update: if isSignedIn() && isExistingOwner(userId) && request.resource.data.id == resource.data.id;
+      allow delete: if isSignedIn() && isExistingOwner(userId);
+    }
+
+    // --- Helper functions ---
+
+    /**
+     * @description Checks if the user is signed in.
+     * @return {boolean} True if the user is signed in, false otherwise.
+     */
+    function isSignedIn() {
+      return request.auth != null;
+    }
+
+    /**
+     * @description Checks if the user ID matches the authenticated user's ID.
+     * @param {string} userId The user ID to check.
+     * @return {boolean} True if the user is the owner, false otherwise.
+     */
+    function isOwner(userId) {
+      return request.auth.uid == userId;
+    }
+
+     /**
+     * @description Checks if the user ID matches the authenticated user's ID and resource exists.
+     * @param {string} userId The user ID to check.
+     * @return {boolean} True if the user is the owner, false otherwise.
+     */
+    function isExistingOwner(userId) {
+      return isOwner(userId) && resource != null;
+    }
+  }
+}
