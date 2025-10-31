@@ -1,9 +1,10 @@
 
 
+
 'use client';
 
 import { useState, useEffect, useMemo } from 'react';
-import { useFirebase, useUser, initiateAnonymousSignIn } from '@/firebase';
+import { useFirebase, useUser, initiateGoogleSignIn } from '@/firebase';
 import {
   collection,
   onSnapshot,
@@ -19,15 +20,26 @@ import {
   writeBatch,
   orderBy,
   setDoc,
+  signOut,
 } from 'firebase/firestore';
 import { BarChart, Bar, XAxis, YAxis, Tooltip, ResponsiveContainer, PieChart, Pie, Cell } from 'recharts';
-import { PlusCircle, MinusCircle, Car, Settings as SettingsIcon, History as HistoryIcon, Edit, Trash2, ArrowLeft, MoreVertical, LogOut, CheckCircle, AlertTriangle } from 'lucide-react';
+import { PlusCircle, MinusCircle, Car, Settings as SettingsIcon, History as HistoryIcon, Edit, Trash2, ArrowLeft, MoreVertical, LogOut, CheckCircle, AlertTriangle, User as UserIcon } from 'lucide-react';
 import { Button } from '@/components/ui/button';
 import { Card, CardContent, CardHeader, CardTitle, CardDescription } from '@/components/ui/card';
 import { Input } from '@/components/ui/input';
 import { Select, SelectContent, SelectItem, SelectTrigger, SelectValue } from '@/components/ui/select';
 import { Dialog, DialogContent, DialogHeader, DialogTitle, DialogFooter } from '@/components/ui/dialog';
 import { Progress } from '@/components/ui/progress';
+import { Avatar, AvatarFallback, AvatarImage } from "@/components/ui/avatar"
+import {
+  DropdownMenu,
+  DropdownMenuContent,
+  DropdownMenuItem,
+  DropdownMenuLabel,
+  DropdownMenuSeparator,
+  DropdownMenuTrigger,
+} from "@/components/ui/dropdown-menu"
+
 
 // Helper to format currency
 const formatCurrency = (value: number) => {
@@ -552,6 +564,26 @@ const History = ({ allPeriods, userId, categories, rideApps }: any) => {
     );
 };
 
+const LoginScreen = ({ onLogin }: { onLogin: () => void }) => {
+  return (
+    <div className="flex flex-col items-center justify-center min-h-screen -mt-20">
+      <Card className="p-8 text-center">
+        <CardHeader>
+          <CardTitle className="text-3xl">Welcome to IDriveApp</CardTitle>
+          <CardDescription>Sign in to track your trips and finances.</CardDescription>
+        </CardHeader>
+        <CardContent>
+          <Button onClick={onLogin} size="lg">
+            <svg className="w-4 h-4 mr-2" aria-hidden="true" focusable="false" data-prefix="fab" data-icon="google" role="img" xmlns="http://www.w3.org/2000/svg" viewBox="0 0 488 512"><path fill="currentColor" d="M488 261.8C488 403.3 381.5 504 248 504 110.8 504 0 393.2 0 256S110.8 8 248 8c66.8 0 126 23.4 172.9 61.9l-72.2 72.2C322 108.9 287.6 96 248 96c-88.8 0-160.1 71.9-160.1 160.1s71.3 160.1 160.1 160.1c98.2 0 135-70.4 140.8-106.9H248v-85.3h236.1c2.3 12.7 3.9 26.9 3.9 41.4z"></path></svg>
+            Sign in with Google
+          </Button>
+        </CardContent>
+      </Card>
+    </div>
+  );
+};
+
+
 // #endregion Components
 
 export default function IDriveApp() {
@@ -569,12 +601,18 @@ export default function IDriveApp() {
   const [isRevenueModalOpen, setRevenueModalOpen] = useState(false);
   const [isExpenseModalOpen, setExpenseModalOpen] = useState(false);
   
-  // Handle anonymous sign-in
-  useEffect(() => {
-    if (!isUserLoading && !user && auth) {
-      initiateAnonymousSignIn(auth);
+  const handleGoogleSignIn = () => {
+    if (auth) {
+      initiateGoogleSignIn(auth);
     }
-  }, [isUserLoading, user, auth]);
+  };
+
+  const handleSignOut = () => {
+    if (auth) {
+      signOut(auth);
+    }
+  };
+  
 
   // Fetch settings (Categories and RideApps)
   useEffect(() => {
@@ -634,11 +672,19 @@ export default function IDriveApp() {
   }, [activePeriod, firestore, user]);
   
   if (isUserLoading) {
-      return <div>Loading...</div>
+      return (
+        <div className="min-h-screen bg-background text-foreground dark flex items-center justify-center">
+            <div>Loading...</div>
+        </div>
+      )
   }
 
   if (!user) {
-      return <div>Please log in to use the application.</div>
+      return (
+         <div className="min-h-screen bg-background text-foreground dark">
+            <LoginScreen onLogin={handleGoogleSignIn} />
+         </div>
+      )
   }
 
   const renderView = () => {
@@ -667,10 +713,33 @@ export default function IDriveApp() {
             <Car className="text-primary h-8 w-8" />
             <h1 className="text-2xl font-bold">IDriveApp</h1>
           </div>
+          <DropdownMenu>
+            <DropdownMenuTrigger asChild>
+                <Button variant="ghost" className="relative h-10 w-10 rounded-full">
+                    <Avatar className="h-10 w-10">
+                        <AvatarImage src={user.photoURL || undefined} alt={user.displayName || 'User'} />
+                        <AvatarFallback><UserIcon/></AvatarFallback>
+                    </Avatar>
+                </Button>
+            </DropdownMenuTrigger>
+            <DropdownMenuContent className="w-56" align="end" forceMount>
+                <DropdownMenuLabel className="font-normal">
+                <div className="flex flex-col space-y-1">
+                    <p className="text-sm font-medium leading-none">{user.displayName}</p>
+                    <p className="text-xs leading-none text-muted-foreground">
+                    {user.email}
+                    </p>
+                </div>
+                </DropdownMenuLabel>
+                <DropdownMenuSeparator />
+                <DropdownMenuItem onClick={handleSignOut}>
+                    <LogOut className="mr-2 h-4 w-4" />
+                    <span>Log out</span>
+                </DropdownMenuItem>
+            </DropdownMenuContent>
+        </DropdownMenu>
         </header>
-        <main>
-          {renderView()}
-        </main>
+        {renderView()}
         <nav className="fixed bottom-0 left-0 right-0 bg-card border-t border-border flex justify-around p-2">
             <Button variant={view === 'Home' ? "secondary" : "ghost"} onClick={() => setView('Home')} className="flex flex-col h-auto">
                 <Car/>
@@ -705,5 +774,3 @@ export default function IDriveApp() {
     </div>
   );
 }
-
-    
