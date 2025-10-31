@@ -25,27 +25,27 @@ service cloud.firestore {
   match /databases/{database}/documents {
 
     /**
-     * @description Allows public read access to the categories collection.
+     * @description Allows public read access to the categories collection, and write access for authenticated users.
      * @path /categories/{categoryId}
      * @allow (get, list) All users can read categories.
-     * @deny (create, update, delete) No one can create, update, or delete categories through the client.
-     * @principle Public read access for application settings.
+     * @allow (create, update, delete) Authenticated users can manage categories.
+     * @principle Public read access for settings, authenticated write for customization.
      */
     match /categories/{categoryId} {
       allow get, list: if true;
-      allow create, update, delete: if false; // Should be managed via an admin interface
+      allow create, update, delete: if request.auth != null;
     }
 
     /**
-     * @description Allows public read access to the rideApps collection.
+     * @description Allows public read access to the rideApps collection, and write access for authenticated users.
      * @path /rideApps/{rideAppId}
      * @allow (get, list) All users can read ride apps.
-     * @deny (create, update, delete) No one can create, update, or delete ride apps through the client.
-     * @principle Public read access for application settings.
+     * @allow (create, update, delete) Authenticated users can manage ride apps.
+     * @principle Public read access for settings, authenticated write for customization.
      */
     match /rideApps/{rideAppId} {
       allow get, list: if true;
-      allow create, update, delete: if false; // Should be managed via an admin interface
+      allow create, update, delete: if request.auth != null;
     }
 
     /**
