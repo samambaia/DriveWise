@@ -19,7 +19,7 @@ import {
   orderBy,
   setDoc,
 } from 'firebase/firestore';
-import { signOut } from 'firebase/auth';
+import { signOut, getRedirectResult } from 'firebase/auth';
 import { BarChart, Bar, XAxis, YAxis, Tooltip, ResponsiveContainer, PieChart, Pie, Cell } from 'recharts';
 import { PlusCircle, MinusCircle, Car, Settings as SettingsIcon, History as HistoryIcon, Edit, Trash2, ArrowLeft, MoreVertical, LogOut, CheckCircle, AlertTriangle, User as UserIcon } from 'lucide-react';
 import { Button } from '@/components/ui/button';
@@ -598,6 +598,7 @@ export default function IDriveApp() {
   
   const [isRevenueModalOpen, setRevenueModalOpen] = useState(false);
   const [isExpenseModalOpen, setExpenseModalOpen] = useState(false);
+  const [isAuthLoading, setAuthLoading] = useState(true);
   
   const handleGoogleSignIn = () => {
     if (auth) {
@@ -611,6 +612,24 @@ export default function IDriveApp() {
     }
   };
   
+  // Handle redirect result from Google Sign-In
+  useEffect(() => {
+    if (auth) {
+      getRedirectResult(auth)
+        .then((result) => {
+          // The user is signed in.
+          // You can get the user's token from result.credential.
+        })
+        .catch((error) => {
+          console.error("Error getting redirect result", error);
+        })
+        .finally(() => {
+            setAuthLoading(false);
+        });
+    } else {
+        setAuthLoading(false);
+    }
+  }, [auth]);
 
   // Fetch settings (Categories and RideApps)
   useEffect(() => {
@@ -669,7 +688,7 @@ export default function IDriveApp() {
     return () => unsubscribe();
   }, [activePeriod, firestore, user]);
   
-  if (isUserLoading) {
+  if (isUserLoading || isAuthLoading) {
       return (
         <div className="min-h-screen bg-background text-foreground dark flex items-center justify-center">
             <div>Loading...</div>
