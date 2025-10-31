@@ -1,6 +1,4 @@
 
-
-
 'use client';
 
 import { useState, useEffect, useMemo } from 'react';
@@ -20,8 +18,8 @@ import {
   writeBatch,
   orderBy,
   setDoc,
-  signOut,
 } from 'firebase/firestore';
+import { signOut } from 'firebase/auth';
 import { BarChart, Bar, XAxis, YAxis, Tooltip, ResponsiveContainer, PieChart, Pie, Cell } from 'recharts';
 import { PlusCircle, MinusCircle, Car, Settings as SettingsIcon, History as HistoryIcon, Edit, Trash2, ArrowLeft, MoreVertical, LogOut, CheckCircle, AlertTriangle, User as UserIcon } from 'lucide-react';
 import { Button } from '@/components/ui/button';
