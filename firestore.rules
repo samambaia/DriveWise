@@ -4,12 +4,12 @@
  *              while allowing public read access to application settings (categories and ride apps).
  *
  * Data Structure:
- * - /settings/{categories, rideApps}: Public collections for storing application settings.
+ * - /categories, /rideApps: Public collections for storing application settings.
  * - /users/{userId}/periods/{periodId}: Private collections storing user-specific financial periods.
  * - /users/{userId}/periods/{periodId}/transactions/{transactionId}: Private subcollections storing user-specific transactions within a period.
  *
  * Key Security Decisions:
- * - Public read access is granted to the 'settings' collections to allow all users to access categories and ride apps.
+ * - Public read access is granted to the 'categories' and 'rideApps' collections to allow all users to access them.
  * - Strict user-ownership is enforced for 'periods' and 'transactions'. Users can only access data under their own user ID.
  * - Data consistency is enforced between the path and the document's internal fields for user-owned data.
  * - User listing is disallowed by default.
@@ -18,7 +18,7 @@
  * - Transactions contain a 'periodId' field, denormalizing the parent relationship for efficient querying and rule enforcement.
  *
  * Structural Segregation:
- * - Public settings are stored in the top-level 'settings' collection, while private user data is stored under /users/{userId}.
+ * - Public settings are stored in top-level collections, while private user data is stored under /users/{userId}.
  */
 rules_version = '2';
 service cloud.firestore {
@@ -26,26 +26,26 @@ service cloud.firestore {
 
     /**
      * @description Allows public read access to the categories collection.
-     * @path /settings/categories
+     * @path /categories/{categoryId}
      * @allow (get, list) All users can read categories.
      * @deny (create, update, delete) No one can create, update, or delete categories through the client.
      * @principle Public read access for application settings.
      */
-    match /settings/categories {
+    match /categories/{categoryId} {
       allow get, list: if true;
-      allow create, update, delete: if false;
+      allow create, update, delete: if false; // Should be managed via an admin interface
     }
 
     /**
      * @description Allows public read access to the rideApps collection.
-     * @path /settings/rideApps
+     * @path /rideApps/{rideAppId}
      * @allow (get, list) All users can read ride apps.
      * @deny (create, update, delete) No one can create, update, or delete ride apps through the client.
      * @principle Public read access for application settings.
      */
-    match /settings/rideApps {
+    match /rideApps/{rideAppId} {
       allow get, list: if true;
-      allow create, update, delete: if false;
+      allow create, update, delete: if false; // Should be managed via an admin interface
     }
 
     /**
@@ -68,15 +68,15 @@ service cloud.firestore {
       }
 
       function isExistingOwner(userId) {
-        return isOwner(userId) && resource != null;
+        return isOwner(userId) && exists(path);
       }
 
       allow create: if isSignedIn()
                    && isOwner(userId)
                    && request.resource.data.id == periodId;
-      allow get: if isSignedIn() && isOwner(userId);
-      allow list: if isSignedIn() && isOwner(userId);
-      allow update: if isExistingOwner(userId)
+      allow get, list: if isSignedIn() && isOwner(userId);
+      allow update: if isSignedIn()
+                    && isOwner(userId)
                     && request.resource.data.id == resource.data.id;
       allow delete: if isExistingOwner(userId);
     }
@@ -92,7 +92,7 @@ service cloud.firestore {
      * @principle Enforces document ownership for writes, validates relational integrity, and prevents unauthorized access.
      */
     match /users/{userId}/periods/{periodId}/transactions/{transactionId} {
-      function isSignedIn() {
+       function isSignedIn() {
         return request.auth != null;
       }
 
@@ -101,16 +101,16 @@ service cloud.firestore {
       }
 
       function isExistingOwner(userId) {
-        return isOwner(userId) && resource != null;
+        return isOwner(userId) && exists(path);
       }
 
       allow create: if isSignedIn()
                    && isOwner(userId)
                    && request.resource.data.periodId == periodId
                    && request.resource.data.id == transactionId;
-      allow get: if isSignedIn() && isOwner(userId);
-      allow list: if isSignedIn() && isOwner(userId);
-      allow update: if isExistingOwner(userId)
+      allow get, list: if isSignedIn() && isOwner(userId);
+      allow update: if isSignedIn()
+                   && isOwner(userId)
                    && request.resource.data.periodId == resource.data.periodId
                    && request.resource.data.id == resource.data.id;
       allow delete: if isExistingOwner(userId);
