@@ -1,3 +1,4 @@
+
 'use client';
 
 import { useState, useEffect, useMemo } from 'react';
@@ -15,6 +16,7 @@ import {
   Timestamp,
   serverTimestamp,
   writeBatch,
+  orderBy,
 } from 'firebase/firestore';
 import { BarChart, Bar, XAxis, YAxis, Tooltip, ResponsiveContainer, PieChart, Pie, Cell } from 'recharts';
 import { PlusCircle, MinusCircle, Car, Settings as SettingsIcon, History as HistoryIcon, Edit, Trash2, ArrowLeft, MoreVertical, LogOut, CheckCircle, AlertTriangle } from 'lucide-react';
@@ -278,8 +280,8 @@ const Settings = ({ categories, rideApps, activePeriod, userId }: any) => {
     const handleAddCategory = async () => {
         if (newCategory.trim() === '' || !firestore) return;
         try {
-            const newCatRef = doc(collection(firestore, 'settings/categories'));
-            await addDoc(collection(firestore, 'settings/categories'), { id: newCatRef.id, name: newCategory });
+            const newCatRef = doc(collection(firestore, 'categories'));
+            await addDoc(collection(firestore, 'categories'), { id: newCatRef.id, name: newCategory });
             setNewCategory('');
         } catch (e) {
             console.error("Error adding category: ", e);
@@ -289,7 +291,7 @@ const Settings = ({ categories, rideApps, activePeriod, userId }: any) => {
     const handleDeleteCategory = async (categoryId: string) => {
         if (!firestore) return;
         try {
-            await deleteDoc(doc(firestore, 'settings/categories', categoryId));
+            await deleteDoc(doc(firestore, 'categories', categoryId));
         } catch (e) {
             console.error("Error deleting category: ", e);
         }
@@ -298,8 +300,8 @@ const Settings = ({ categories, rideApps, activePeriod, userId }: any) => {
     const handleAddRideApp = async () => {
         if (newRideApp.trim() === '' || !firestore) return;
         try {
-            const newAppRef = doc(collection(firestore, 'settings/rideApps'));
-            await addDoc(collection(firestore, 'settings/rideApps'), { id: newAppRef.id, name: newRideApp });
+            const newAppRef = doc(collection(firestore, 'rideApps'));
+            await addDoc(collection(firestore, 'rideApps'), { id: newAppRef.id, name: newRideApp });
             setNewRideApp('');
         } catch (e) {
             console.error("Error adding ride app: ", e);
@@ -309,7 +311,7 @@ const Settings = ({ categories, rideApps, activePeriod, userId }: any) => {
     const handleDeleteRideApp = async (appId: string) => {
         if (!firestore) return;
         try {
-            await deleteDoc(doc(firestore, 'settings/rideApps', appId));
+            await deleteDoc(doc(firestore, 'rideApps', appId));
         } catch(e) {
             console.error("Error deleting ride app: ", e);
         }
@@ -566,12 +568,12 @@ export default function IDriveApp() {
   // Fetch settings (Categories and RideApps)
   useEffect(() => {
     if (!firestore) return;
-    const catUnsub = onSnapshot(collection(firestore, 'settings/categories'), (snapshot) => {
+    const catUnsub = onSnapshot(collection(firestore, 'categories'), (snapshot) => {
         const catData: any[] = [];
         snapshot.forEach(doc => catData.push({ id: doc.id, ...doc.data() }));
         setCategories(catData);
     });
-    const appUnsub = onSnapshot(collection(firestore, 'settings/rideApps'), (snapshot) => {
+    const appUnsub = onSnapshot(collection(firestore, 'rideApps'), (snapshot) => {
         const appData: any[] = [];
         snapshot.forEach(doc => appData.push({ id: doc.id, ...doc.data() }));
         setRideApps(appData);
