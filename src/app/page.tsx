@@ -44,6 +44,10 @@ const RevenueModal = ({ isOpen, onClose, activePeriodId, rideApps }: any) => {
       setError('Amount and app are required.');
       return;
     }
+    if (!db) {
+        setError('Database not ready.');
+        return;
+    }
     try {
       await addDoc(collection(db, 'transactions'), {
         type: 'Revenue',
@@ -101,6 +105,10 @@ const ExpenseModal = ({ isOpen, onClose, activePeriodId, categories }: any) => {
     if (!amount || !categoryOrApp || !description) {
       setError('All fields are required.');
       return;
+    }
+    if (!db) {
+        setError('Database not ready.');
+        return;
     }
     try {
       await addDoc(collection(db, 'transactions'), {
@@ -258,7 +266,7 @@ const Settings = ({ categories, rideApps, activePeriod }: any) => {
     }, [activePeriod]);
 
     const handleAddCategory = async () => {
-        if (newCategory.trim() === '') return;
+        if (newCategory.trim() === '' || !db) return;
         try {
             const settingsDoc = doc(db, 'settings', 'appData');
             await updateDoc(settingsDoc, { categories: [...categories, newCategory] });
@@ -269,6 +277,7 @@ const Settings = ({ categories, rideApps, activePeriod }: any) => {
     };
     
     const handleDeleteCategory = async (categoryToDelete: string) => {
+        if (!db) return;
         try {
             const settingsDoc = doc(db, 'settings', 'appData');
             await updateDoc(settingsDoc, { categories: categories.filter((c: string) => c !== categoryToDelete) });
@@ -278,7 +287,7 @@ const Settings = ({ categories, rideApps, activePeriod }: any) => {
     };
     
     const handleAddRideApp = async () => {
-        if (newRideApp.trim() === '') return;
+        if (newRideApp.trim() === '' || !db) return;
         try {
             const settingsDoc = doc(db, 'settings', 'appData');
             await updateDoc(settingsDoc, { rideApps: [...rideApps, newRideApp] });
@@ -289,6 +298,7 @@ const Settings = ({ categories, rideApps, activePeriod }: any) => {
     };
 
     const handleDeleteRideApp = async (appToDelete: string) => {
+        if (!db) return;
         try {
             const settingsDoc = doc(db, 'settings', 'appData');
             await updateDoc(settingsDoc, { rideApps: rideApps.filter((a: string) => a !== appToDelete) });
@@ -298,7 +308,7 @@ const Settings = ({ categories, rideApps, activePeriod }: any) => {
     };
 
     const handleActivateNewPeriod = async () => {
-        if (!startDate || !endDate || !initialBalance || !targetBalance) {
+        if (!startDate || !endDate || !initialBalance || !targetBalance || !db) {
             alert("Please fill all period fields.");
             return;
         }
@@ -403,7 +413,7 @@ const History = ({ allPeriods }: any) => {
     }, [allPeriods, selectedPeriodId]);
 
     useEffect(() => {
-        if (!selectedPeriodId) return;
+        if (!selectedPeriodId || !db) return;
 
         const q = query(collection(db, 'transactions'), where('periodId', '==', selectedPeriodId));
         const unsubscribe = onSnapshot(q, (querySnapshot) => {
@@ -534,6 +544,7 @@ export default function IDriveApp() {
   
   // Fetch settings
   useEffect(() => {
+    if (!db) return;
     const unsub = onSnapshot(doc(db, 'settings', 'appData'), (doc) => {
         if (doc.exists()) {
             setCategories(doc.data().categories || []);
@@ -545,6 +556,7 @@ export default function IDriveApp() {
 
   // Fetch all periods for History view
   useEffect(() => {
+    if (!db) return;
     const unsub = onSnapshot(collection(db, 'periods'), (snapshot) => {
         const periodsData: any[] = [];
         snapshot.forEach(doc => periodsData.push({ id: doc.id, ...doc.data() }));
@@ -557,7 +569,7 @@ export default function IDriveApp() {
 
   // Fetch transactions for active period
   useEffect(() => {
-    if (!activePeriod) {
+    if (!activePeriod || !db) {
         setTransactions([]);
         return;
     };
