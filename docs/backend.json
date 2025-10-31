@@ -8,11 +8,11 @@
       "properties": {
         "id": {
           "type": "string",
-          "description": "Unique identifier for the Category entity."
+          "description": "Unique identifier for the category."
         },
         "name": {
           "type": "string",
-          "description": "The name of the expense category (e.g., 'Fuel', 'Toll')."
+          "description": "Name of the category (e.g., 'Fuel', 'Toll')."
         }
       },
       "required": [
@@ -28,11 +28,11 @@
       "properties": {
         "id": {
           "type": "string",
-          "description": "Unique identifier for the RideApp entity."
+          "description": "Unique identifier for the ride app."
         },
         "name": {
           "type": "string",
-          "description": "The name of the ride application (e.g., 'Uber', '99')."
+          "description": "Name of the ride application (e.g., 'Uber', '99')."
         }
       },
       "required": [
@@ -48,25 +48,25 @@
       "properties": {
         "id": {
           "type": "string",
-          "description": "Unique identifier for the Period entity."
+          "description": "Unique identifier for the period."
         },
         "startDate": {
           "type": "string",
-          "description": "Timestamp of the period's start date.",
+          "description": "Timestamp of the period start.",
           "format": "date-time"
         },
         "endDate": {
           "type": "string",
-          "description": "Timestamp of the period's end date.",
+          "description": "Timestamp of the period end.",
           "format": "date-time"
         },
         "initialBalance": {
           "type": "number",
-          "description": "The initial financial balance at the start of the period."
+          "description": "The starting financial value for the period."
         },
         "targetBalance": {
           "type": "number",
-          "description": "The target financial balance to be achieved by the end of the period."
+          "description": "The final financial goal for the period."
         },
         "isActive": {
           "type": "boolean",
@@ -90,27 +90,27 @@
       "properties": {
         "id": {
           "type": "string",
-          "description": "Unique identifier for the Transaction entity."
+          "description": "Unique identifier for the transaction."
         },
         "type": {
           "type": "string",
-          "description": "The type of transaction ('Revenue' or 'Expense')."
+          "description": "Type of transaction ('Revenue' or 'Expense')."
         },
         "amount": {
           "type": "number",
-          "description": "The amount of the transaction."
+          "description": "Value of the transaction."
         },
         "description": {
           "type": "string",
-          "description": "A description of the transaction."
+          "description": "Details about the transaction."
         },
         "categoryOrAppId": {
           "type": "string",
-          "description": "Reference to Category or RideApp. (Relationship: Category 1:N Transaction or RideApp 1:N Transaction)"
+          "description": "Reference to Category or RideApp depending on transaction type. (Relationship: Category 1:N Transaction, RideApp 1:N Transaction)"
         },
         "tripCount": {
           "type": "number",
-          "description": "The number of trips associated with the transaction (only for revenue)."
+          "description": "Number of trips (only for Revenue transactions)."
         },
         "periodId": {
           "type": "string",
@@ -142,13 +142,23 @@
   "firestore": {
     "structure": [
       {
-        "path": "/settings/config",
+        "path": "/settings/categories",
         "definition": {
-          "entityName": "config",
+          "entityName": "Category",
           "schema": {
-            "$ref": "#/backend/entities/Config"
+            "$ref": "#/backend/entities/Category"
           },
-          "description": "Stores global configuration settings, including arrays of categories and rideApps. This collection is publicly readable."
+          "description": "Stores expense categories. Public data, no authorization required."
+        }
+      },
+      {
+        "path": "/settings/rideApps",
+        "definition": {
+          "entityName": "RideApp",
+          "schema": {
+            "$ref": "#/backend/entities/RideApp"
+          },
+          "description": "Stores ride applications. Public data, no authorization required."
         }
       },
       {
@@ -158,40 +168,44 @@
           "schema": {
             "$ref": "#/backend/entities/Period"
           },
-          "description": "Stores financial periods specific to a user.  Authorization is based on the `userId` path segment.",
+          "description": "Stores financial periods for each user. Uses path-based ownership for authorization.",
           "params": [
             {
               "name": "userId",
-              "description": "The unique identifier of the user."
+              "description": "The ID of the user."
             },
             {
               "name": "periodId",
-              "description": "The unique identifier of the period."
+              "description": "The ID of the financial period."
             }
           ]
         }
       },
       {
-        "path": "/users/{userId}/transactions/{transactionId}",
+        "path": "/users/{userId}/periods/{periodId}/transactions/{transactionId}",
         "definition": {
           "entityName": "Transaction",
           "schema": {
             "$ref": "#/backend/entities/Transaction"
           },
-          "description": "Stores financial transactions specific to a user and period. Authorization is based on the `userId` path segment.",
+          "description": "Stores transactions for a specific period owned by a user. Uses path-based ownership, inheriting authorization from the parent period. Includes denormalized 'periodId' for authorization independence and efficient querying.",
           "params": [
             {
               "name": "userId",
-              "description": "The unique identifier of the user."
+              "description": "The ID of the user."
+            },
+            {
+              "name": "periodId",
+              "description": "The ID of the financial period."
             },
             {
               "name": "transactionId",
-              "description": "The unique identifier of the transaction."
+              "description": "The ID of the transaction."
             }
           ]
         }
       }
     ],
-    "reasoning": "The Firestore structure is designed to ensure authorization independence, clarity, and scalability. User-specific data (Periods and Transactions) are stored under user-specific paths (`/users/{userId}/periods/{periodId}` and `/users/{userId}/transactions/{transactionId}`). This eliminates the need for complex security rules involving `get()` calls to parent documents, thus ensuring atomic operations and easier debugging.  Categories and RideApps are stored in a global collection `/settings` since they are public and shared across all users. To fulfill the 'Rules are not Filters' principle, Transactions are stored inside user document, to allow listing transactions only for an authenticated user. This structure facilitates secure `list` operations because we only allow listing from user-owned collections."
+    "reasoning": "The Firestore structure is designed to ensure security, scalability, and ease of debugging, adhering to the principles of Authorization Independence, Clarity of Intent, DBAC (Database-Based Access Control), and QAPs (Rules are not Filters). Authorization Independence is achieved through denormalization. For instance, access to `transactions` is governed by the `periodId` which implicitly grants access based on the user's ownership of the period document. \n\nStructural Segregation is employed by separating public `settings` from user-specific data like `periods` and `transactions`. Access Modeling uses path-based ownership for user-specific data (`/users/{userId}/periods/{periodId}`).\n\nTo ensure QAPs, the collections are structured to avoid filtering on the client-side, and security rules are written to validate data based on path and data content. For example, listing transactions requires that the user has access to the `periodId` which is part of the transaction.\n\nThe settings collection stores application-level configuration data, which is considered public, whereas the periods and transaction collections store user-specific financial data."
   }
 }
