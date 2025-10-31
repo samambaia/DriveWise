@@ -1,4 +1,5 @@
 
+
 'use client';
 
 import { useState, useEffect, useMemo } from 'react';
@@ -17,6 +18,7 @@ import {
   serverTimestamp,
   writeBatch,
   orderBy,
+  setDoc,
 } from 'firebase/firestore';
 import { BarChart, Bar, XAxis, YAxis, Tooltip, ResponsiveContainer, PieChart, Pie, Cell } from 'recharts';
 import { PlusCircle, MinusCircle, Car, Settings as SettingsIcon, History as HistoryIcon, Edit, Trash2, ArrowLeft, MoreVertical, LogOut, CheckCircle, AlertTriangle } from 'lucide-react';
@@ -53,8 +55,9 @@ const RevenueModal = ({ isOpen, onClose, activePeriodId, rideApps, userId }: any
         return;
     }
     try {
-      const newTransactionRef = doc(collection(firestore, `users/${userId}/periods/${activePeriodId}/transactions`));
-      await addDoc(collection(firestore, `users/${userId}/periods/${activePeriodId}/transactions`), {
+      const transactionCollection = collection(firestore, `users/${userId}/periods/${activePeriodId}/transactions`);
+      const newTransactionRef = doc(transactionCollection);
+      await setDoc(newTransactionRef, {
         id: newTransactionRef.id,
         type: 'Revenue',
         amount: parseFloat(amount),
@@ -119,8 +122,9 @@ const ExpenseModal = ({ isOpen, onClose, activePeriodId, categories, userId }: a
         return;
     }
     try {
-      const newTransactionRef = doc(collection(firestore, `users/${userId}/periods/${activePeriodId}/transactions`));
-      await addDoc(collection(firestore, `users/${userId}/periods/${activePeriodId}/transactions`), {
+      const transactionCollection = collection(firestore, `users/${userId}/periods/${activePeriodId}/transactions`);
+      const newTransactionRef = doc(transactionCollection);
+      await setDoc(newTransactionRef, {
         id: newTransactionRef.id,
         type: 'Expense',
         amount: parseFloat(amount),
@@ -281,7 +285,7 @@ const Settings = ({ categories, rideApps, activePeriod, userId }: any) => {
         if (newCategory.trim() === '' || !firestore) return;
         try {
             const newCatRef = doc(collection(firestore, 'categories'));
-            await addDoc(collection(firestore, 'categories'), { id: newCatRef.id, name: newCategory });
+            await setDoc(newCatRef, { id: newCatRef.id, name: newCategory });
             setNewCategory('');
         } catch (e) {
             console.error("Error adding category: ", e);
@@ -301,7 +305,7 @@ const Settings = ({ categories, rideApps, activePeriod, userId }: any) => {
         if (newRideApp.trim() === '' || !firestore) return;
         try {
             const newAppRef = doc(collection(firestore, 'rideApps'));
-            await addDoc(collection(firestore, 'rideApps'), { id: newAppRef.id, name: newRideApp });
+            await setDoc(newAppRef, { id: newAppRef.id, name: newRideApp });
             setNewRideApp('');
         } catch (e) {
             console.error("Error adding ride app: ", e);
@@ -409,7 +413,7 @@ const Settings = ({ categories, rideApps, activePeriod, userId }: any) => {
                       </li>
                     ))}
                   </ul>
-                </CardContent>.
+                </CardContent>
               </Card>
             </div>
         </div>
@@ -599,10 +603,11 @@ export default function IDriveApp() {
         return;
     };
     const periodsRef = collection(firestore, `users/${user.uid}/periods`);
-    const unsub = onSnapshot(periodsRef, (snapshot) => {
+    const q = query(periodsRef, orderBy('startDate', 'desc'));
+    const unsub = onSnapshot(q, (snapshot) => {
         const periodsData: any[] = [];
         snapshot.forEach(doc => periodsData.push({ id: doc.id, ...doc.data() }));
-        setAllPeriods(periodsData.sort((a,b) => b.startDate.toMillis() - a.startDate.toMillis()));
+        setAllPeriods(periodsData);
         const active = periodsData.find(p => p.isActive);
         setActivePeriod(active);
     });
@@ -628,8 +633,12 @@ export default function IDriveApp() {
     return () => unsubscribe();
   }, [activePeriod, firestore, user]);
   
-  if (isUserLoading || !user) {
+  if (isUserLoading) {
       return <div>Loading...</div>
+  }
+
+  if (!user) {
+      return <div>Please log in to use the application.</div>
   }
 
   const renderView = () => {
@@ -696,3 +705,5 @@ export default function IDriveApp() {
     </div>
   );
 }
+
+    
