@@ -1,7 +1,7 @@
 'use client';
 
 import { useState, useEffect, useMemo } from 'react';
-import { db } from '../../firebase/config';
+import { db } from '@/firebase';
 import {
   collection,
   onSnapshot,
@@ -16,7 +16,7 @@ import {
   serverTimestamp,
 } from 'firebase/firestore';
 import { BarChart, Bar, XAxis, YAxis, Tooltip, ResponsiveContainer, PieChart, Pie, Cell } from 'recharts';
-import { PlusCircle, MinusCircle, Car, Settings as SettingsIcon, History, Edit, Trash2, ArrowLeft, MoreVertical, LogOut, CheckCircle, AlertTriangle } from 'lucide-react';
+import { PlusCircle, MinusCircle, Car, Settings as SettingsIcon, History as HistoryIcon, Edit, Trash2, ArrowLeft, MoreVertical, LogOut, CheckCircle, AlertTriangle } from 'lucide-react';
 import { Button } from '@/components/ui/button';
 import { Card, CardContent, CardHeader, CardTitle, CardDescription } from '@/components/ui/card';
 import { Input } from '@/components/ui/input';
@@ -397,7 +397,7 @@ const History = ({ allPeriods }: any) => {
     const [transactions, setTransactions] = useState<any[]>([]);
 
     useEffect(() => {
-        if (allPeriods.length > 0 && !selectedPeriodId) {
+        if (allPeriods && allPeriods.length > 0 && !selectedPeriodId) {
             setSelectedPeriodId(allPeriods.find((p:any) => p.isActive)?.id || allPeriods[0].id);
         }
     }, [allPeriods, selectedPeriodId]);
@@ -450,7 +450,7 @@ const History = ({ allPeriods }: any) => {
                             <SelectValue placeholder="Select a period" />
                         </SelectTrigger>
                         <SelectContent>
-                            {allPeriods.map((p: any) => (
+                            {allPeriods && allPeriods.map((p: any) => (
                                 <SelectItem key={p.id} value={p.id}>
                                     {new Date(p.startDate?.toDate()).toLocaleDateString()} - {new Date(p.endDate?.toDate()).toLocaleDateString()} {p.isActive && '(Active)'}
                                 </SelectItem>
@@ -614,7 +614,7 @@ export default function IDriveApp() {
                 <span>Settings</span>
             </Button>
             <Button variant={view === 'History' ? "secondary" : "ghost"} onClick={() => setView('History')} className="flex flex-col h-auto">
-                <History/>
+                <HistoryIcon/>
                 <span>History</span>
             </Button>
         </nav>
