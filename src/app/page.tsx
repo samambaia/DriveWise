@@ -3,7 +3,7 @@
 'use client';
 
 import { useState, useEffect, useMemo } from 'react';
-import { useFirebase, useUser, initiateGoogleSignIn } from '@/firebase';
+import { useFirebase, useUser } from '@/firebase';
 import {
   collection,
   onSnapshot,
@@ -20,7 +20,7 @@ import {
   orderBy,
   setDoc,
 } from 'firebase/firestore';
-import { signOut, getRedirectResult } from 'firebase/auth';
+import { signOut, createUserWithEmailAndPassword, signInWithEmailAndPassword } from 'firebase/auth';
 import { BarChart, Bar, XAxis, YAxis, Tooltip, ResponsiveContainer, PieChart, Pie, Cell } from 'recharts';
 import { PlusCircle, MinusCircle, Car, Settings as SettingsIcon, History as HistoryIcon, Edit, Trash2, ArrowLeft, MoreVertical, LogOut, CheckCircle, AlertTriangle, User as UserIcon } from 'lucide-react';
 import { Button } from '@/components/ui/button';
@@ -563,23 +563,55 @@ const History = ({ allPeriods, userId, categories, rideApps }: any) => {
     );
 };
 
-const LoginScreen = ({ onLogin }: { onLogin: () => void }) => {
-  return (
-    <div className="flex flex-col items-center justify-center min-h-screen -mt-20">
-      <Card className="p-8 text-center">
-        <CardHeader>
-          <CardTitle className="text-3xl">Welcome to IDriveApp</CardTitle>
-          <CardDescription>Sign in to track your trips and finances.</CardDescription>
-        </CardHeader>
-        <CardContent>
-          <Button onClick={onLogin} size="lg">
-            <svg className="w-4 h-4 mr-2" aria-hidden="true" focusable="false" data-prefix="fab" data-icon="google" role="img" xmlns="http://www.w3.org/2000/svg" viewBox="0 0 488 512"><path fill="currentColor" d="M488 261.8C488 403.3 381.5 504 248 504 110.8 504 0 393.2 0 256S110.8 8 248 8c66.8 0 126 23.4 172.9 61.9l-72.2 72.2C322 108.9 287.6 96 248 96c-88.8 0-160.1 71.9-160.1 160.1s71.3 160.1 160.1 160.1c98.2 0 135-70.4 140.8-106.9H248v-85.3h236.1c2.3 12.7 3.9 26.9 3.9 41.4z"></path></svg>
-            Sign in with Google
-          </Button>
-        </CardContent>
-      </Card>
-    </div>
-  );
+const LoginScreen = () => {
+    const { auth } = useFirebase();
+    const [email, setEmail] = useState('');
+    const [password, setPassword] = useState('');
+    const [isSignUp, setIsSignUp] = useState(false);
+    const [error, setError] = useState('');
+  
+    const handleAuthAction = async () => {
+      if (!auth || !email || !password) {
+        setError("Please enter email and password.");
+        return;
+      }
+      setError('');
+      try {
+        if (isSignUp) {
+          await createUserWithEmailAndPassword(auth, email, password);
+        } else {
+          await signInWithEmailAndPassword(auth, email, password);
+        }
+        // Auth state change will be handled by the global `useUser` hook.
+      } catch (e: any) {
+        setError(e.message);
+        console.error("Authentication error:", e);
+      }
+    };
+  
+    return (
+      <div className="flex flex-col items-center justify-center min-h-screen -mt-20">
+        <Card className="p-8 w-full max-w-sm">
+          <CardHeader>
+            <CardTitle className="text-2xl text-center">{isSignUp ? 'Create Account' : 'Welcome Back'}</CardTitle>
+            <CardDescription className="text-center">
+              {isSignUp ? 'Enter your email and password to sign up.' : 'Sign in to track your trips and finances.'}
+            </CardDescription>
+          </CardHeader>
+          <CardContent className="space-y-4">
+            {error && <p className="text-red-500 text-sm text-center">{error}</p>}
+            <Input type="email" placeholder="Email" value={email} onChange={(e) => setEmail(e.target.value)} />
+            <Input type="password" placeholder="Password" value={password} onChange={(e) => setPassword(e.target.value)} />
+            <Button onClick={handleAuthAction} className="w-full">
+              {isSignUp ? 'Sign Up' : 'Sign In'}
+            </Button>
+            <Button variant="link" onClick={() => { setIsSignUp(!isSignUp); setError(''); }} className="w-full">
+              {isSignUp ? 'Already have an account? Sign In' : "Don't have an account? Sign Up"}
+            </Button>
+          </CardContent>
+        </Card>
+      </div>
+    );
 };
 
 
@@ -599,39 +631,13 @@ export default function IDriveApp() {
   
   const [isRevenueModalOpen, setRevenueModalOpen] = useState(false);
   const [isExpenseModalOpen, setExpenseModalOpen] = useState(false);
-  const [isAuthLoading, setAuthLoading] = useState(true);
   
-  const handleGoogleSignIn = () => {
-    if (auth) {
-      initiateGoogleSignIn(auth);
-    }
-  };
-
   const handleSignOut = () => {
     if (auth) {
       signOut(auth);
     }
   };
   
-  // Handle redirect result from Google Sign-In
-  useEffect(() => {
-    if (auth) {
-      getRedirectResult(auth)
-        .then((result) => {
-          // The user is signed in.
-          // You can get the user's token from result.credential.
-        })
-        .catch((error) => {
-          console.error("Error getting redirect result", error);
-        })
-        .finally(() => {
-            setAuthLoading(false);
-        });
-    } else {
-        setAuthLoading(false);
-    }
-  }, [auth]);
-
   // Fetch settings (Categories and RideApps)
   useEffect(() => {
     if (!firestore) return;
@@ -689,7 +695,7 @@ export default function IDriveApp() {
     return () => unsubscribe();
   }, [activePeriod, firestore, user]);
   
-  if (isUserLoading || isAuthLoading) {
+  if (isUserLoading) {
       return (
         <div className="min-h-screen bg-background text-foreground dark flex items-center justify-center">
             <div>Loading...</div>
@@ -700,7 +706,7 @@ export default function IDriveApp() {
   if (!user) {
       return (
          <div className="min-h-screen bg-background text-foreground dark">
-            <LoginScreen onLogin={handleGoogleSignIn} />
+            <LoginScreen />
          </div>
       )
   }
@@ -743,10 +749,10 @@ export default function IDriveApp() {
             <DropdownMenuContent className="w-56" align="end" forceMount>
                 <DropdownMenuLabel className="font-normal">
                 <div className="flex flex-col space-y-1">
-                    <p className="text-sm font-medium leading-none">{user.displayName}</p>
-                    <p className="text-xs leading-none text-muted-foreground">
+                    <p className="text-sm font-medium leading-none">{user.displayName || user.email}</p>
+                    {user.displayName && <p className="text-xs leading-none text-muted-foreground">
                     {user.email}
-                    </p>
+                    </p>}
                 </div>
                 </DropdownMenuLabel>
                 <DropdownMenuSeparator />
