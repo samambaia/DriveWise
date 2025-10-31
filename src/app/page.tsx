@@ -38,6 +38,7 @@ import {
   DropdownMenuSeparator,
   DropdownMenuTrigger,
 } from "@/components/ui/dropdown-menu"
+import { CurrencyInput } from '@/components/ui/CurrencyInput';
 
 
 // Helper to format currency
@@ -84,8 +85,8 @@ const RevenueModal = ({ isOpen, onClose, activePeriodId, rideApps, userId }: any
       setTripCount('1');
       setError('');
     } catch (e) {
-      console.error('Error adding revenue: ', e);
-      setError('Failed to add revenue.');
+      console.error('Erro adicionando corrida: ', e);
+      setError('Falhou ao adicionar corrida.');
     }
   };
 
@@ -125,7 +126,7 @@ const ExpenseModal = ({ isOpen, onClose, activePeriodId, categories, userId }: a
 
   const handleSubmit = async () => {
     if (!amount || !categoryOrAppId || !description) {
-      setError('All fields are required.');
+      setError('Todos os campos são obrigatórios.');
       return;
     }
     if (!firestore || !userId || !activePeriodId) {
@@ -150,8 +151,8 @@ const ExpenseModal = ({ isOpen, onClose, activePeriodId, categories, userId }: a
       setDescription('');
       setError('');
     } catch (e) {
-      console.error('Error adding expense: ', e);
-      setError('Failed to add expense.');
+      console.error('Erro ao Adicionar uma despesa: ', e);
+      setError('Falhou ao adicionar despesa.');
     }
   };
 
@@ -159,7 +160,7 @@ const ExpenseModal = ({ isOpen, onClose, activePeriodId, categories, userId }: a
     <Dialog open={isOpen} onOpenChange={onClose}>
       <DialogContent>
         <DialogHeader>
-          <DialogTitle>Log Expense</DialogTitle>
+          <DialogTitle>Despesas</DialogTitle>
         </DialogHeader>
         {error && <p className="text-red-500">{error}</p>}
         <div className="space-y-4 py-4">
@@ -212,7 +213,7 @@ const Dashboard = ({ transactions, activePeriod, onOpenRevenue, onOpenExpense }:
       <Card className="bg-card">
         <CardHeader>
           <CardTitle>Dashboard</CardTitle>
-          <CardDescription>Your financial summary for the active period.</CardDescription>
+          <CardDescription>Seu resumo financeiro para o período.</CardDescription>
         </CardHeader>
         <CardContent className="text-center">
             <h2 className="text-sm text-muted-foreground">Saldo Atual</h2>
@@ -225,7 +226,7 @@ const Dashboard = ({ transactions, activePeriod, onOpenRevenue, onOpenExpense }:
       {activePeriod && (
         <Card>
           <CardHeader>
-              <CardTitle>Goal Progress</CardTitle>
+              <CardTitle>Progresso da Meta</CardTitle>
           </CardHeader>
           <CardContent>
             <Progress value={Math.max(0, Math.min(100, progress))} className="w-full" />
@@ -254,7 +255,7 @@ const Dashboard = ({ transactions, activePeriod, onOpenRevenue, onOpenExpense }:
         </Card>
         <Card>
           <CardHeader>
-            <CardTitle>Total Revenue</CardTitle>
+            <CardTitle>Total Corridas</CardTitle>
           </CardHeader>
           <CardContent>
             <p className="text-2xl font-bold text-green-400">{formatCurrency(totalRevenue)}</p>
@@ -262,7 +263,7 @@ const Dashboard = ({ transactions, activePeriod, onOpenRevenue, onOpenExpense }:
         </Card>
         <Card>
           <CardHeader>
-            <CardTitle>Total Expenses</CardTitle>
+            <CardTitle>Total Despesas</CardTitle>
           </CardHeader>
           <CardContent>
             <p className="text-2xl font-bold text-red-400">{formatCurrency(totalExpenses)}</p>
@@ -280,15 +281,15 @@ const Settings = ({ categories, rideApps, activePeriod, userId }: any) => {
 
     const [startDate, setStartDate] = useState('');
     const [endDate, setEndDate] = useState('');
-    const [initialBalance, setInitialBalance] = useState('');
-    const [targetBalance, setTargetBalance] = useState('');
+    const [initialBalance, setInitialBalance] = useState<number | undefined>(0);
+    const [targetBalance, setTargetBalance] = useState<number | undefined>(0);
     
     useEffect(() => {
         if (activePeriod) {
             setStartDate(activePeriod.startDate?.toDate().toISOString().split('T')[0] || '');
             setEndDate(activePeriod.endDate?.toDate().toISOString().split('T')[0] || '');
-            setInitialBalance(activePeriod.initialBalance?.toString() || '');
-            setTargetBalance(activePeriod.targetBalance?.toString() || '');
+            setInitialBalance(activePeriod.initialBalance || 0);
+            setTargetBalance(activePeriod.targetBalance || 0);
         }
     }, [activePeriod]);
 
@@ -333,7 +334,7 @@ const Settings = ({ categories, rideApps, activePeriod, userId }: any) => {
     };
 
     const handleActivateNewPeriod = async () => {
-        if (!startDate || !endDate || !initialBalance || !targetBalance || !firestore || !userId) {
+        if (!startDate || !endDate || initialBalance === undefined || targetBalance === undefined || !firestore || !userId) {
             alert("Please fill all period fields.");
             return;
         }
@@ -353,8 +354,8 @@ const Settings = ({ categories, rideApps, activePeriod, userId }: any) => {
                 id: newPeriodRef.id,
                 startDate: Timestamp.fromDate(new Date(startDate)),
                 endDate: Timestamp.fromDate(new Date(endDate)),
-                initialBalance: parseFloat(initialBalance),
-                targetBalance: parseFloat(targetBalance),
+                initialBalance: initialBalance,
+                targetBalance: targetBalance,
                 isActive: true,
             });
 
@@ -371,29 +372,29 @@ const Settings = ({ categories, rideApps, activePeriod, userId }: any) => {
         <div className="space-y-8">
             <Card>
                 <CardHeader>
-                    <CardTitle>Period Configuration</CardTitle>
-                    <CardDescription>{activePeriod ? 'Edit the current period or start a new one.' : 'Define a new period to start tracking.'}</CardDescription>
+                    <CardTitle>Configuração Período</CardTitle>
+                    <CardDescription>{activePeriod ? 'Edite o período atual ou comece um novo.' : 'Defina um novo período para iniciar o rastreamento.'}</CardDescription>
                 </CardHeader>
                 <CardContent className="space-y-4">
                     <div className="grid grid-cols-1 md:grid-cols-2 gap-4">
                         <Input type="date" value={startDate} onChange={(e) => setStartDate(e.target.value)} placeholder="Start Date" />
                         <Input type="date" value={endDate} onChange={(e) => setEndDate(e.target.value)} placeholder="End Date" />
-                        <Input type="number" value={initialBalance} onChange={(e) => setInitialBalance(e.target.value)} placeholder="Initial Balance" />
-                        <Input type="number" value={targetBalance} onChange={(e) => setTargetBalance(e.target.value)} placeholder="Target Balance" />
+                        <CurrencyInput value={initialBalance || 0} onValueChange={(value) => setInitialBalance(value)} placeholder="Saldo Inicial" />
+                        <CurrencyInput value={targetBalance || 0} onValueChange={(value) => setTargetBalance(value)} placeholder="Objetivo Período" />
                     </div>
-                    <Button onClick={handleActivateNewPeriod}>{activePeriod ? 'Activate New Period' : 'Activate Period'}</Button>
-                    <p className="text-xs text-muted-foreground">Note: Activating a new period will archive the current one.</p>
+                    <Button onClick={handleActivateNewPeriod}>{activePeriod ? 'Ativar Novo Período' : 'Ativar Período'}</Button>
+                    <p className="text-xs text-muted-foreground">Nota: Ativar um novo período vai arquivar o atual.</p>
                 </CardContent>
             </Card>
 
             <div className="grid grid-cols-1 md:grid-cols-2 gap-8">
               <Card>
                 <CardHeader>
-                  <CardTitle>Expense Categories</CardTitle>
+                  <CardTitle>Categorias de Despesa</CardTitle>
                 </CardHeader>
                 <CardContent>
                   <div className="flex gap-2 mb-4">
-                    <Input value={newCategory} onChange={e => setNewCategory(e.target.value)} placeholder="New Category" />
+                    <Input value={newCategory} onChange={e => setNewCategory(e.target.value)} placeholder="Nova Categoria" />
                     <Button onClick={handleAddCategory}>Add</Button>
                   </div>
                   <ul className="space-y-2">
@@ -409,11 +410,11 @@ const Settings = ({ categories, rideApps, activePeriod, userId }: any) => {
 
               <Card>
                 <CardHeader>
-                  <CardTitle>Ride Apps</CardTitle>
+                  <CardTitle>Apps de Corrida</CardTitle>
                 </CardHeader>
                 <CardContent>
                   <div className="flex gap-2 mb-4">
-                    <Input value={newRideApp} onChange={e => setNewRideApp(e.target.value)} placeholder="New Ride App" />
+                    <Input value={newRideApp} onChange={e => setNewRideApp(e.target.value)} placeholder="Novo App de Corrida" />
                     <Button onClick={handleAddRideApp}>Add</Button>
                   </div>
                   <ul className="space-y-2">
@@ -508,7 +509,7 @@ const History = ({ allPeriods, userId, categories, rideApps }: any) => {
 
             <div className="grid grid-cols-1 lg:grid-cols-2 gap-6">
                 <Card>
-                    <CardHeader><CardTitle>Expense Breakdown</CardTitle></CardHeader>
+                    <CardHeader><CardTitle>Detalhamento Despesa</CardTitle></CardHeader>
                     <CardContent>
                         {expenseData.length > 0 ? (
                             <ResponsiveContainer width="100%" height={300}>
@@ -542,7 +543,7 @@ const History = ({ allPeriods, userId, categories, rideApps }: any) => {
             </div>
             
             <Card>
-                <CardHeader><CardTitle>Transactions</CardTitle></CardHeader>
+                <CardHeader><CardTitle>Lançamentos</CardTitle></CardHeader>
                 <CardContent>
                     <div className="space-y-2">
                         {transactions && transactions.map(t => (
