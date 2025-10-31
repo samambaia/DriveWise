@@ -12,4 +12,4 @@ To run the app in development mode, use the following command in your project's 
 npm run dev
 ```
 
-This will start the development server, and you can view your application by opening a browser and navigating to the URL provided in the terminal (usually http://localhost:9002).
+This will start the development server, and you can view your application by opening a browser and navigating to the URL provided in the terminal (usually http://localhost:9003).
