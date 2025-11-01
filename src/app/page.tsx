@@ -40,6 +40,7 @@ import {
   DropdownMenuTrigger,
 } from "@/components/ui/dropdown-menu"
 import { CurrencyInput } from '@/components/ui/CurrencyInput';
+import { TransactionModal } from '@/components/TransactionModal';
 
 
 // Helper to format currency
@@ -51,138 +52,6 @@ const formatCurrency = (value: number) => {
 };
 
 // #region Components
-const RevenueModal = ({ isOpen, onClose, activePeriodId, rideApps, userId }: any) => {
-  const { firestore } = useFirebase();
-  const [amount, setAmount] = useState('');
-  const [categoryOrAppId, setCategoryOrAppId] = useState('');
-  const [tripCount, setTripCount] = useState('1');
-  const [error, setError] = useState('');
-
-  const handleSubmit = async () => {
-    if (!amount || !categoryOrAppId) {
-      setError('Amount and app are required.');
-      return;
-    }
-    if (!firestore || !userId || !activePeriodId) {
-        setError('Database not ready or user/period not available.');
-        return;
-    }
-    try {
-      const transactionCollection = collection(firestore, `users/${userId}/periods/${activePeriodId}/transactions`);
-      const newTransactionRef = doc(transactionCollection);
-      await setDoc(newTransactionRef, {
-        id: newTransactionRef.id,
-        type: 'Revenue',
-        amount: parseFloat(amount),
-        categoryOrAppId: categoryOrAppId,
-        tripCount: parseInt(tripCount, 10) || 1,
-        periodId: activePeriodId,
-        timestamp: serverTimestamp(),
-        description: rideApps.find((app: any) => app.id === categoryOrAppId)?.name || 'Ride',
-      });
-      onClose();
-      setAmount('');
-      setCategoryOrAppId('');
-      setTripCount('1');
-      setError('');
-    } catch (e) {
-      console.error('Erro adicionando corrida: ', e);
-      setError('Falhou ao adicionar corrida.');
-    }
-  };
-
-  return (
-    <Dialog open={isOpen} onOpenChange={onClose}>
-      <DialogContent>
-        <DialogHeader>
-          <DialogTitle>Corrida (Receita)</DialogTitle>
-        </DialogHeader>
-        {error && <p className="text-red-500">{error}</p>}
-        <div className="space-y-4 py-4">
-          <Input type="number" placeholder="Amount" value={amount} onChange={(e) => setAmount(e.target.value)} className="bg-input" />
-          <Select onValueChange={setCategoryOrAppId} value={categoryOrAppId}>
-            <SelectTrigger><SelectValue placeholder="Select Ride App" /></SelectTrigger>
-            <SelectContent>
-              {rideApps.map((app: any) => (
-                <SelectItem key={app.id} value={app.id}>{app.name}</SelectItem>
-              ))}
-            </SelectContent>
-          </Select>
-          <Input type="number" placeholder="Trip Count (optional)" value={tripCount} onChange={(e) => setTripCount(e.target.value)} className="bg-input" />
-        </div>
-        <DialogFooter>
-          <Button onClick={handleSubmit} variant="outline">Save</Button>
-        </DialogFooter>
-      </DialogContent>
-    </Dialog>
-  );
-};
-
-const ExpenseModal = ({ isOpen, onClose, activePeriodId, categories, userId }: any) => {
-  const { firestore } = useFirebase();
-  const [amount, setAmount] = useState('');
-  const [categoryOrAppId, setCategoryOrAppId] = useState('');
-  const [description, setDescription] = useState('');
-  const [error, setError] = useState('');
-
-  const handleSubmit = async () => {
-    if (!amount || !categoryOrAppId || !description) {
-      setError('Todos os campos são obrigatórios.');
-      return;
-    }
-    if (!firestore || !userId || !activePeriodId) {
-        setError('Database not ready or user/period not available.');
-        return;
-    }
-    try {
-      const transactionCollection = collection(firestore, `users/${userId}/periods/${activePeriodId}/transactions`);
-      const newTransactionRef = doc(transactionCollection);
-      await setDoc(newTransactionRef, {
-        id: newTransactionRef.id,
-        type: 'Expense',
-        amount: parseFloat(amount),
-        categoryOrAppId: categoryOrAppId,
-        description,
-        periodId: activePeriodId,
-        timestamp: serverTimestamp(),
-      });
-      onClose();
-      setAmount('');
-      setCategoryOrAppId('');
-      setDescription('');
-      setError('');
-    } catch (e) {
-      console.error('Erro ao Adicionar uma despesa: ', e);
-      setError('Falhou ao adicionar despesa.');
-    }
-  };
-
-  return (
-    <Dialog open={isOpen} onOpenChange={onClose}>
-      <DialogContent>
-        <DialogHeader>
-          <DialogTitle>Despesas</DialogTitle>
-        </DialogHeader>
-        {error && <p className="text-red-500">{error}</p>}
-        <div className="space-y-4 py-4">
-          <Input type="number" placeholder="Amount" value={amount} onChange={(e) => setAmount(e.target.value)} className="bg-input" />
-          <Select onValueChange={setCategoryOrAppId} value={categoryOrAppId}>
-            <SelectTrigger><SelectValue placeholder="Select Category" /></SelectTrigger>
-            <SelectContent>
-              {categories.map((cat: any) => (
-                <SelectItem key={cat.id} value={cat.id}>{cat.name}</SelectItem>
-              ))}
-            </SelectContent>
-          </Select>
-          <Input placeholder="Description" value={description} onChange={(e) => setDescription(e.target.value)} className="bg-input" />
-        </div>
-        <DialogFooter>
-          <Button onClick={handleSubmit} variant="outline">Save</Button>
-        </DialogFooter>
-      </DialogContent>
-    </Dialog>
-  );
-};
 
 const Dashboard = ({ transactions, activePeriod, onOpenRevenue, onOpenExpense }: any) => {
   const { totalRevenue, totalExpenses, totalTrips } = useMemo(() => {
@@ -433,7 +302,7 @@ const Settings = ({ categories, rideApps, activePeriod, userId }: any) => {
     );
 };
 
-const History = ({ allPeriods, userId, categories, rideApps }: any) => {
+const History = ({ allPeriods, userId, categories, rideApps, onEditTransaction }: any) => {
     const { firestore } = useFirebase();
     const [selectedPeriodId, setSelectedPeriodId] = useState('');
     const [transactions, setTransactions] = useState<any[]>([]);
@@ -584,7 +453,7 @@ const History = ({ allPeriods, userId, categories, rideApps }: any) => {
                                             <Button variant="ghost" size="icon"><MoreVertical className="h-4 w-4"/></Button>
                                         </DropdownMenuTrigger>
                                         <DropdownMenuContent align="end">
-                                            <DropdownMenuItem disabled>
+                                            <DropdownMenuItem onClick={() => onEditTransaction(t)}>
                                                 <Edit className="mr-2 h-4 w-4" />
                                                 <span>Edit</span>
                                             </DropdownMenuItem>
@@ -684,9 +553,28 @@ export default function IDriveApp() {
   const [allPeriods, setAllPeriods] = useState<any[]>([]);
   const [transactions, setTransactions] = useState<any[]>([]);
   
-  const [isRevenueModalOpen, setRevenueModalOpen] = useState(false);
-  const [isExpenseModalOpen, setExpenseModalOpen] = useState(false);
+  const [isTransactionModalOpen, setTransactionModalOpen] = useState(false);
+  const [transactionToEdit, setTransactionToEdit] = useState<any>(null);
+  const [newTransactionType, setNewTransactionType] = useState<'Revenue' | 'Expense' | null>(null);
+
+  const handleOpenNewTransaction = (type: 'Revenue' | 'Expense') => {
+    setTransactionToEdit(null);
+    setNewTransactionType(type);
+    setTransactionModalOpen(true);
+  };
   
+  const handleEditTransaction = (transaction: any) => {
+    setNewTransactionType(null);
+    setTransactionToEdit(transaction);
+    setTransactionModalOpen(true);
+  };
+  
+  const handleCloseTransactionModal = () => {
+    setTransactionModalOpen(false);
+    setTransactionToEdit(null);
+    setNewTransactionType(null);
+  };
+
   const handleSignOut = () => {
     if (auth) {
       signOut(auth);
@@ -772,13 +660,19 @@ export default function IDriveApp() {
         return <Dashboard 
             transactions={transactions} 
             activePeriod={activePeriod}
-            onOpenRevenue={() => setRevenueModalOpen(true)}
-            onOpenExpense={() => setExpenseModalOpen(true)}
+            onOpenRevenue={() => handleOpenNewTransaction('Revenue')}
+            onOpenExpense={() => handleOpenNewTransaction('Expense')}
         />;
       case 'Settings':
         return <Settings categories={categories} rideApps={rideApps} activePeriod={activePeriod} userId={user.uid} />;
       case 'History':
-        return <History allPeriods={allPeriods} userId={user.uid} categories={categories} rideApps={rideApps} />;
+        return <History 
+            allPeriods={allPeriods} 
+            userId={user.uid} 
+            categories={categories} 
+            rideApps={rideApps}
+            onEditTransaction={handleEditTransaction}
+        />;
       default:
         return <Dashboard transactions={[]} activePeriod={null} onOpenRevenue={() => {}} onOpenExpense={() => {}} />;
     }
@@ -836,20 +730,18 @@ export default function IDriveApp() {
         <div className="pb-20"></div> {/* padding for bottom nav */}
       </div>
       
-      <RevenueModal 
-        isOpen={isRevenueModalOpen} 
-        onClose={() => setRevenueModalOpen(false)} 
-        activePeriodId={activePeriod?.id}
-        rideApps={rideApps}
-        userId={user.uid}
-      />
-      <ExpenseModal
-        isOpen={isExpenseModalOpen}
-        onClose={() => setExpenseModalOpen(false)}
-        activePeriodId={activePeriod?.id}
-        categories={categories}
-        userId={user.uid}
-      />
+      {isTransactionModalOpen && (
+        <TransactionModal 
+          isOpen={isTransactionModalOpen} 
+          onClose={handleCloseTransactionModal} 
+          transaction={transactionToEdit}
+          periodId={activePeriod?.id}
+          userId={user.uid}
+          categories={categories}
+          rideApps={rideApps}
+          defaultType={newTransactionType}
+        />
+      )}
     </div>
   );
 }
