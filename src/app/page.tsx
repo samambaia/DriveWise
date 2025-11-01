@@ -28,6 +28,7 @@ import { Card, CardContent, CardHeader, CardTitle, CardDescription } from '@/com
 import { Input } from '@/components/ui/input';
 import { Select, SelectContent, SelectItem, SelectTrigger, SelectValue } from '@/components/ui/select';
 import { Dialog, DialogContent, DialogHeader, DialogTitle, DialogFooter } from '@/components/ui/dialog';
+import { AlertDialog, AlertDialogAction, AlertDialogCancel, AlertDialogContent, AlertDialogDescription, AlertDialogFooter, AlertDialogHeader, AlertDialogTitle } from '@/components/ui/alert-dialog';
 import { Progress } from '@/components/ui/progress';
 import { Avatar, AvatarFallback, AvatarImage } from "@/components/ui/avatar"
 import {
@@ -436,6 +437,7 @@ const History = ({ allPeriods, userId, categories, rideApps }: any) => {
     const { firestore } = useFirebase();
     const [selectedPeriodId, setSelectedPeriodId] = useState('');
     const [transactions, setTransactions] = useState<any[]>([]);
+    const [transactionToDelete, setTransactionToDelete] = useState<any>(null);
 
     useEffect(() => {
         if (allPeriods && allPeriods.length > 0 && !selectedPeriodId) {
@@ -444,20 +446,33 @@ const History = ({ allPeriods, userId, categories, rideApps }: any) => {
     }, [allPeriods, selectedPeriodId]);
 
     useEffect(() => {
-        if (!selectedPeriodId || !firestore || !userId) return;
+        if (!selectedPeriodId || !firestore || !userId) {
+            setTransactions([]);
+            return;
+        }
 
-        const q = query(collection(firestore, `users/${userId}/periods/${selectedPeriodId}/transactions`));
+        const q = query(collection(firestore, `users/${userId}/periods/${selectedPeriodId}/transactions`), orderBy('timestamp', 'desc'));
         const unsubscribe = onSnapshot(q, (querySnapshot) => {
             const newTransactions: any[] = [];
             querySnapshot.forEach((doc) => {
                 newTransactions.push({ id: doc.id, ...doc.data() });
             });
-            setTransactions(newTransactions.sort((a,b) => b.timestamp - a.timestamp));
+            setTransactions(newTransactions);
         });
 
         return () => unsubscribe();
     }, [selectedPeriodId, firestore, userId]);
 
+    const handleDeleteTransaction = async () => {
+        if (!transactionToDelete || !firestore || !userId) return;
+        try {
+            await deleteDoc(doc(firestore, `users/${userId}/periods/${transactionToDelete.periodId}/transactions`, transactionToDelete.id));
+            setTransactionToDelete(null);
+        } catch (error) {
+            console.error("Error deleting transaction: ", error);
+        }
+    };
+    
     const { expenseData, tripData } = useMemo(() => {
         if (!transactions || !categories || !rideApps) return { expenseData: [], tripData: [] };
 
@@ -557,19 +572,49 @@ const History = ({ allPeriods, userId, categories, rideApps }: any) => {
 
                             return (
                                 <div key={t.id} className="flex justify-between items-center p-3 bg-card-foreground/5 rounded-lg">
-                                    <div>
+                                    <div className="flex-1">
                                         <p className={`font-bold ${t.type === 'Revenue' ? 'text-green-400' : 'text-red-400'}`}>
                                             {t.type === 'Revenue' ? `+ ${formatCurrency(t.amount)}` : `- ${formatCurrency(t.amount)}`}
                                         </p>
                                         <p className="text-sm text-muted-foreground">{fullDescription}</p>
+                                        <p className="text-xs text-muted-foreground">{t.timestamp?.toDate().toLocaleString()}</p>
                                     </div>
-                                    <p className="text-sm text-muted-foreground">{t.timestamp?.toDate().toLocaleDateString()}</p>
+                                    <DropdownMenu>
+                                        <DropdownMenuTrigger asChild>
+                                            <Button variant="ghost" size="icon"><MoreVertical className="h-4 w-4"/></Button>
+                                        </DropdownMenuTrigger>
+                                        <DropdownMenuContent align="end">
+                                            <DropdownMenuItem disabled>
+                                                <Edit className="mr-2 h-4 w-4" />
+                                                <span>Edit</span>
+                                            </DropdownMenuItem>
+                                            <DropdownMenuItem onClick={() => setTransactionToDelete(t)} className="text-red-500 focus:text-red-500">
+                                                <Trash2 className="mr-2 h-4 w-4" />
+                                                <span>Delete</span>
+                                            </DropdownMenuItem>
+                                        </DropdownMenuContent>
+                                    </DropdownMenu>
                                 </div>
                             );
                         })}
                     </div>
                 </CardContent>
             </Card>
+
+            <AlertDialog open={!!transactionToDelete} onOpenChange={() => setTransactionToDelete(null)}>
+                <AlertDialogContent>
+                    <AlertDialogHeader>
+                        <AlertDialogTitle>Are you sure?</AlertDialogTitle>
+                        <AlertDialogDescription>
+                            This action cannot be undone. This will permanently delete the transaction.
+                        </AlertDialogDescription>
+                    </AlertDialogHeader>
+                    <AlertDialogFooter>
+                        <AlertDialogCancel>Cancel</AlertDialogCancel>
+                        <AlertDialogAction onClick={handleDeleteTransaction} className="bg-red-500 hover:bg-red-600">Delete</AlertDialogAction>
+                    </AlertDialogFooter>
+                </AlertDialogContent>
+            </AlertDialog>
         </div>
     );
 };
@@ -808,3 +853,5 @@ export default function IDriveApp() {
     </div>
   );
 }
+
+    
