@@ -94,7 +94,7 @@ const RevenueModal = ({ isOpen, onClose, activePeriodId, rideApps, userId }: any
     <Dialog open={isOpen} onOpenChange={onClose}>
       <DialogContent>
         <DialogHeader>
-          <DialogTitle>Log Trip (Revenue)</DialogTitle>
+          <DialogTitle>Corrida (Receita)</DialogTitle>
         </DialogHeader>
         {error && <p className="text-red-500">{error}</p>}
         <div className="space-y-4 py-4">
@@ -240,8 +240,8 @@ const Dashboard = ({ transactions, activePeriod, onOpenRevenue, onOpenExpense }:
       )}
 
       <div className="grid grid-cols-1 md:grid-cols-2 gap-4">
-        <Button onClick={onOpenRevenue} className="p-6 text-lg"><PlusCircle className="mr-2"/> Log Trip (Revenue)</Button>
-        <Button onClick={onOpenExpense} variant="destructive" className="p-6 text-lg"><MinusCircle className="mr-2"/> Log Expense</Button>
+        <Button onClick={onOpenRevenue} className="p-6 text-lg"><PlusCircle className="mr-2"/> Corrida (Receita)</Button>
+        <Button onClick={onOpenExpense} variant="destructive" className="p-6 text-lg"><MinusCircle className="mr-2"/> Despesa</Button>
       </div>
 
       <div className="grid grid-cols-1 md:grid-cols-3 gap-4">
@@ -489,17 +489,17 @@ const History = ({ allPeriods, userId, categories, rideApps }: any) => {
         <div className="space-y-6">
              <Card>
                 <CardHeader>
-                    <CardTitle>History & Analytics</CardTitle>
+                    <CardTitle>Análise & Histórico</CardTitle>
                 </CardHeader>
                 <CardContent>
                     <Select onValueChange={setSelectedPeriodId} value={selectedPeriodId}>
                         <SelectTrigger>
-                            <SelectValue placeholder="Select a period" />
+                            <SelectValue placeholder="Selecione um período" />
                         </SelectTrigger>
                         <SelectContent>
                             {allPeriods && allPeriods.map((p: any) => (
                                 <SelectItem key={p.id} value={p.id}>
-                                    {new Date(p.startDate?.toDate()).toLocaleDateString()} - {new Date(p.endDate?.toDate()).toLocaleDateString()} {p.isActive && '(Active)'}
+                                    {new Date(p.startDate?.toDate()).toLocaleDateString()} - {new Date(p.endDate?.toDate()).toLocaleDateString()} {p.isActive && '(Ativo)'}
                                 </SelectItem>
                             ))}
                         </SelectContent>
@@ -526,7 +526,7 @@ const History = ({ allPeriods, userId, categories, rideApps }: any) => {
                     </CardContent>
                 </Card>
                 <Card>
-                    <CardHeader><CardTitle>Trip Breakdown</CardTitle></CardHeader>
+                    <CardHeader><CardTitle>Detalhamento Corridas</CardTitle></CardHeader>
                     <CardContent>
                         {tripData.length > 0 ? (
                            <ResponsiveContainer width="100%" height={300}>
@@ -546,17 +546,27 @@ const History = ({ allPeriods, userId, categories, rideApps }: any) => {
                 <CardHeader><CardTitle>Lançamentos</CardTitle></CardHeader>
                 <CardContent>
                     <div className="space-y-2">
-                        {transactions && transactions.map(t => (
-                            <div key={t.id} className="flex justify-between items-center p-3 bg-card-foreground/5 rounded-lg">
-                                <div>
-                                    <p className={`font-bold ${t.type === 'Revenue' ? 'text-green-400' : 'text-red-400'}`}>
-                                        {t.type === 'Revenue' ? `+ ${formatCurrency(t.amount)}` : `- ${formatCurrency(t.amount)}`}
-                                    </p>
-                                    <p className="text-sm text-muted-foreground">{t.description} {t.description && `- ${t.description}`}</p>
+                        {transactions && transactions.map(t => {
+                            const detailName = t.type === 'Revenue'
+                                ? rideApps.find((app: any) => app.id === t.categoryOrAppId)?.name
+                                : categories.find((cat: any) => cat.id === t.categoryOrAppId)?.name;
+                            
+                            const fullDescription = t.type === 'Expense' 
+                                ? `${detailName || 'Categoria'} - ${t.description}` 
+                                : detailName || 'Receita';
+
+                            return (
+                                <div key={t.id} className="flex justify-between items-center p-3 bg-card-foreground/5 rounded-lg">
+                                    <div>
+                                        <p className={`font-bold ${t.type === 'Revenue' ? 'text-green-400' : 'text-red-400'}`}>
+                                            {t.type === 'Revenue' ? `+ ${formatCurrency(t.amount)}` : `- ${formatCurrency(t.amount)}`}
+                                        </p>
+                                        <p className="text-sm text-muted-foreground">{fullDescription}</p>
+                                    </div>
+                                    <p className="text-sm text-muted-foreground">{t.timestamp?.toDate().toLocaleDateString()}</p>
                                 </div>
-                                <p className="text-sm text-muted-foreground">{t.timestamp?.toDate().toLocaleDateString()}</p>
-                            </div>
-                        ))}
+                            );
+                        })}
                     </div>
                 </CardContent>
             </Card>
@@ -767,15 +777,15 @@ export default function IDriveApp() {
         <nav className="fixed bottom-0 left-0 right-0 bg-card border-t border-border flex justify-around p-2">
             <Button variant={view === 'Home' ? "secondary" : "ghost"} onClick={() => setView('Home')} className="flex flex-col h-auto">
                 <Car/>
-                <span>Home</span>
+                <span>Principal</span>
             </Button>
             <Button variant={view === 'Settings' ? "secondary" : "ghost"} onClick={() => setView('Settings')} className="flex flex-col h-auto">
                 <SettingsIcon/>
-                <span>Settings</span>
+                <span>Configurações</span>
             </Button>
             <Button variant={view === 'History' ? "secondary" : "ghost"} onClick={() => setView('History')} className="flex flex-col h-auto">
                 <HistoryIcon/>
-                <span>History</span>
+                <span>Histórico</span>
             </Button>
         </nav>
         <div className="pb-20"></div> {/* padding for bottom nav */}
