@@ -742,7 +742,7 @@ export default function IDriveApp() {
   return (
     <div className="min-h-screen bg-background text-foreground dark">
       <div className="container mx-auto p-4 max-w-4xl">
-        <header className="hidden md:flex justify-between items-center py-4 mb-6">
+        <header className="flex justify-between items-center py-4 mb-6">
           <div className="flex items-center gap-2">
             <Car className="text-primary h-8 w-8" />
             <h1 className="text-2xl font-bold">DriveWise</h1>
@@ -774,7 +774,7 @@ export default function IDriveApp() {
         </DropdownMenu>
         </header>
         {renderView()}
-        <nav className="fixed bottom-0 left-0 right-0 bg-card border-t border-border hidden md:flex justify-around p-2">
+        <nav className="fixed bottom-0 left-0 right-0 bg-card border-t border-border flex justify-around p-2">
             <Button variant={view === 'Home' ? "secondary" : "ghost"} onClick={() => setView('Home')} className="flex flex-col h-auto">
                 <Car/>
                 <span>Principal</span>
