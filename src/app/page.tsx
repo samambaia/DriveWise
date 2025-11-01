@@ -41,6 +41,7 @@ import {
 } from "@/components/ui/dropdown-menu"
 import { CurrencyInput } from '@/components/ui/CurrencyInput';
 import { TransactionModal } from '@/components/TransactionModal';
+import { useToast } from '@/hooks/use-toast';
 
 
 // Helper to format currency
@@ -304,6 +305,7 @@ const Settings = ({ categories, rideApps, activePeriod, userId }: any) => {
 
 const History = ({ allPeriods, userId, categories, rideApps, onEditTransaction }: any) => {
     const { firestore } = useFirebase();
+    const { toast } = useToast();
     const [selectedPeriodId, setSelectedPeriodId] = useState('');
     const [transactions, setTransactions] = useState<any[]>([]);
     const [transactionToDelete, setTransactionToDelete] = useState<any>(null);
@@ -337,8 +339,18 @@ const History = ({ allPeriods, userId, categories, rideApps, onEditTransaction }
         try {
             await deleteDoc(doc(firestore, `users/${userId}/periods/${transactionToDelete.periodId}/transactions`, transactionToDelete.id));
             setTransactionToDelete(null);
+            toast({
+                title: "Success",
+                description: "Transaction deleted successfully.",
+                variant: "default",
+            });
         } catch (error) {
             console.error("Error deleting transaction: ", error);
+            toast({
+                title: "Error",
+                description: "Could not delete transaction. Please try again.",
+                variant: "destructive",
+            });
         }
     };
     
