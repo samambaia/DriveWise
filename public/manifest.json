@@ -1,7 +1,7 @@
 {
   "name": "DriveWise",
   "short_name": "DriveWise",
-  "description": "Your personal driver finance tracker.",
+  "description": "Seu controle pessoal de finanças para Motoristas de App.",
   "start_url": "/",
   "display": "standalone",
   "background_color": "#09090b",

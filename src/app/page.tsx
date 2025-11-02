@@ -42,6 +42,7 @@ import {
 import { CurrencyInput } from '@/components/ui/CurrencyInput';
 import { TransactionModal } from '@/components/TransactionModal';
 import { useToast } from '@/hooks/use-toast';
+import { Label } from '@/components/ui/label';
 
 
 // Helper to format currency
@@ -247,11 +248,22 @@ const Settings = ({ categories, rideApps, activePeriod, userId }: any) => {
                     <CardDescription>{activePeriod ? 'Edite o período atual ou comece um novo.' : 'Defina um novo período para iniciar o rastreamento.'}</CardDescription>
                 </CardHeader>
                 <CardContent className="space-y-4">
-                    <div className="grid grid-cols-1 md:grid-cols-2 gap-4">
-                        <Input type="date" value={startDate} onChange={(e) => setStartDate(e.target.value)} placeholder="Start Date" />
+                    <div className="space-y-2">
+                      <Label htmlFor="startDate">Período</Label>
+                      <div className="grid grid-cols-2 gap-4">
+                        <Input id="startDate" type="date" value={startDate} onChange={(e) => setStartDate(e.target.value)} placeholder="Start Date" />
                         <Input type="date" value={endDate} onChange={(e) => setEndDate(e.target.value)} placeholder="End Date" />
-                        <CurrencyInput value={initialBalance || 0} onValueChange={(value) => setInitialBalance(value)} placeholder="Saldo Inicial" />
-                        <CurrencyInput value={targetBalance || 0} onValueChange={(value) => setTargetBalance(value)} placeholder="Objetivo Período" />
+                      </div>
+                    </div>
+                    <div className="grid grid-cols-2 gap-4">
+                      <div className="space-y-2">
+                        <Label htmlFor="initialBalance">Saldo Inicial</Label>
+                        <CurrencyInput id="initialBalance" value={initialBalance || 0} onValueChange={(value) => setInitialBalance(value)} placeholder="Saldo Inicial" />
+                      </div>
+                      <div className="space-y-2">
+                        <Label htmlFor="targetBalance">Objetivo do Período</Label>
+                        <CurrencyInput id="targetBalance" value={targetBalance || 0} onValueChange={(value) => setTargetBalance(value)} placeholder="Objetivo Período" />
+                      </div>
                     </div>
                     <Button onClick={handleActivateNewPeriod}>{activePeriod ? 'Ativar Novo Período' : 'Ativar Período'}</Button>
                     <p className="text-xs text-muted-foreground">Nota: Ativar um novo período vai arquivar o atual.</p>
@@ -759,3 +771,4 @@ export default function IDriveApp() {
 }
 
     
+
