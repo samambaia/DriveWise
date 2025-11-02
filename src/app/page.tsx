@@ -430,7 +430,7 @@ const History = ({ allPeriods, userId, categories, rideApps, onEditTransaction }
                                     <Tooltip formatter={(value:any) => formatCurrency(value)} />
                                 </PieChart>
                             </ResponsiveContainer>
-                        ) : <p>No expense data for this period.</p>}
+                        ) : <p>Nenhuma despesa no período.</p>}
                     </CardContent>
                 </Card>
                 <Card>
@@ -445,7 +445,7 @@ const History = ({ allPeriods, userId, categories, rideApps, onEditTransaction }
                                     <Bar dataKey="value" fill="#82ca9d" name="Trips" />
                                 </BarChart>
                             </ResponsiveContainer>
-                        ) : <p>No trip data for this period.</p>}
+                        ) : <p>Nenhuma corrida no período.</p>}
                     </CardContent>
                 </Card>
             </div>

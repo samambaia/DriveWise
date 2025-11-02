@@ -17,9 +17,14 @@ const formatCurrency = (value: number) => {
 };
 
 const parseCurrency = (value: string): number | undefined => {
+    const isNegative = value.includes('-');
     const digits = value.replace(/\D/g, "");
     if (digits) {
-        return parseInt(digits, 10) / 100;
+        let numberValue = parseInt(digits, 10) / 100;
+        if (isNegative) {
+            numberValue = -numberValue;
+        }
+        return numberValue;
     }
     return undefined;
 };
@@ -45,7 +50,8 @@ const CurrencyInput = React.forwardRef<HTMLInputElement, CurrencyInputProps>(
       const numericValue = parseCurrency(inputVal);
 
       if (numericValue !== undefined) {
-        setDisplayValue(formatCurrency(numericValue));
+        // We don't format here so the user can continue typing
+        setDisplayValue(inputVal);
         onValueChange(numericValue);
       } else {
         setDisplayValue('');
