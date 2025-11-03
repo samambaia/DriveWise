@@ -21,7 +21,7 @@ import {
 } from 'firebase/firestore';
 import { signOut, createUserWithEmailAndPassword, signInWithEmailAndPassword } from 'firebase/auth';
 import { BarChart, Bar, XAxis, YAxis, Tooltip, ResponsiveContainer, PieChart, Pie, Cell } from 'recharts';
-import { PlusCircle, MinusCircle, Car, Settings as SettingsIcon, History as HistoryIcon, Edit, Trash2, ArrowLeft, MoreVertical, LogOut, CheckCircle, AlertTriangle, User as UserIcon } from 'lucide-react';
+import { PlusCircle, MinusCircle, Settings as SettingsIcon, History as HistoryIcon, Edit, Trash2, ArrowLeft, MoreVertical, LogOut, CheckCircle, AlertTriangle, User as UserIcon } from 'lucide-react';
 import { Button } from '@/components/ui/button';
 import { Card, CardContent, CardHeader, CardTitle, CardDescription } from '@/components/ui/card';
 import { Input } from '@/components/ui/input';
@@ -53,6 +53,31 @@ const formatCurrency = (value: number) => {
 };
 
 // #region Components
+
+const DriveWiseIcon = (props: React.SVGProps<SVGSVGElement>) => (
+    <svg 
+        xmlns="http://www.w3.org/2000/svg" 
+        viewBox="0 0 24 24" 
+        fill="none" 
+        stroke="currentColor" 
+        strokeWidth="2" 
+        strokeLinecap="round" 
+        strokeLinejoin="round" 
+        {...props}
+    >
+        <path d="M12 22c5.523 0 10-4.477 10-10S17.523 2 12 2 2 6.477 2 12s4.477 10 10 10z"/>
+        <path d="M12 12m-3 0a3 3 0 1 0 6 0 3 3 0 1 0-6 0"/>
+        <path d="M12 4.5V9"/>
+        <path d="m16.5 7.5-.866.5"/>
+        <path d="M20 12h-4.5"/>
+        <path d="m16.5 16.5-.866-.5"/>
+        <path d="M12 19.5V15"/>
+        <path d="m7.5 16.5.866-.5"/>
+        <path d="M4 12h4.5"/>
+        <path d="m7.5 7.5.866.5"/>
+    </svg>
+);
+
 
 const Dashboard = ({ transactions, activePeriod, onOpenRevenue, onOpenExpense }: any) => {
   const { totalRevenue, totalExpenses, totalTrips } = useMemo(() => {
@@ -155,23 +180,30 @@ const Settings = ({ categories, rideApps, activePeriod, userId }: any) => {
     // Helper to get YYYY-MM-DD from a Date object, respecting local timezone
     const toLocalDateString = (date: Date | null | undefined) => {
         if (!date) return '';
-        // Create a new date object that is timezone-offset adjusted
         const adjustedDate = new Date(date.getTime() - (date.getTimezoneOffset() * 60000));
         return adjustedDate.toISOString().split('T')[0];
     }
     
     // State for the form fields
-    const [startDate, setStartDate] = useState('');
-    const [endDate, setEndDate] = useState('');
+    const [startDate, setStartDate] = useState<string>('');
+    const [endDate, setEndDate] = useState<string>('');
     const [initialBalance, setInitialBalance] = useState<number | undefined>(0);
     const [targetBalance, setTargetBalance] = useState<number | undefined>(0);
 
     // Effect to sync form state with the activePeriod prop
     useEffect(() => {
-        setStartDate(toLocalDateString(activePeriod?.startDate?.toDate()));
-        setEndDate(toLocalDateString(activePeriod?.endDate?.toDate()));
-        setInitialBalance(activePeriod?.initialBalance || 0);
-        setTargetBalance(activePeriod?.targetBalance || 0);
+        if (activePeriod) {
+            setStartDate(toLocalDateString(activePeriod.startDate?.toDate()));
+            setEndDate(toLocalDateString(activePeriod.endDate?.toDate()));
+            setInitialBalance(activePeriod.initialBalance || 0);
+            setTargetBalance(activePeriod.targetBalance || 0);
+        } else {
+            // Set default empty/zero values if there's no active period
+            setStartDate('');
+            setEndDate('');
+            setInitialBalance(0);
+            setTargetBalance(0);
+        }
     }, [activePeriod]);
 
 
@@ -288,7 +320,7 @@ const Settings = ({ categories, rideApps, activePeriod, userId }: any) => {
                 </CardHeader>
                 <CardContent className="space-y-4">
                     <div className="space-y-2">
-                      <Label htmlFor="startDate">Período</Label>
+                      <Label htmlFor="startDate">Período:</Label>
                       <div className="grid grid-cols-2 gap-4">
                         <Input id="startDate" type="date" value={startDate} onChange={(e) => setStartDate(e.target.value)} placeholder="Start Date" />
                         <Input type="date" value={endDate} onChange={(e) => setEndDate(e.target.value)} placeholder="End Date" />
@@ -393,14 +425,14 @@ const History = ({ allPeriods, userId, categories, rideApps, onEditTransaction }
             await deleteDoc(doc(firestore, `users/${userId}/periods/${transactionToDelete.periodId}/transactions`, transactionToDelete.id));
             toast({
                 title: "Transaction Deleted",
-                description: "The transaction was successfully removed.",
+                description: "A transação foi removida com sucesso.",
                 variant: "default",
             });
         } catch (error) {
             console.error("Error deleting transaction: ", error);
             toast({
                 title: "Deletion Failed",
-                description: "Could not delete the transaction. Please try again.",
+                description: "Não pude deletar a transação. Tente novamente.",
                 variant: "destructive",
             });
         } finally {
@@ -541,7 +573,7 @@ const History = ({ allPeriods, userId, categories, rideApps, onEditTransaction }
                     <AlertDialogHeader>
                         <AlertDialogTitle>Are you sure?</AlertDialogTitle>
                         <AlertDialogDescription>
-                            This action cannot be undone. This will permanently delete the transaction.
+                            Essa ação não pode ser desfeita. Isso irá apagar definitivamente a transação.
                         </AlertDialogDescription>
                     </AlertDialogHeader>
                     <AlertDialogFooter>
@@ -563,7 +595,7 @@ const LoginScreen = () => {
 
   const handleAuthAction = async () => {
     if (!auth || !email || !password) {
-      setError("Please enter email and password.");
+      setError("Por favor, entre com o e-mail e senha.");
       return;
     }
     setError('');
@@ -583,20 +615,20 @@ const LoginScreen = () => {
     <div className="flex flex-col items-center justify-center min-h-screen -mt-20">
       <Card className="p-8 w-full max-w-sm">
         <CardHeader>
-          <CardTitle className="text-2xl text-center">{isSignUp ? 'Create Account' : 'Welcome Back'}</CardTitle>
+          <CardTitle className="text-2xl text-center">{isSignUp ? 'Criar Conta' : 'Bem vindo de Volta'}</CardTitle>
           <CardDescription className="text-center">
-            {isSignUp ? 'Enter your email and password to sign up.' : 'Sign in to track your trips and finances.'}
+            {isSignUp ? 'Entre com seu e-mail e senha pra se registrar.' : 'Faça login para acompanhar suas viagens e finanças.'}
           </CardDescription>
         </CardHeader>
         <CardContent className="space-y-4">
           {error && <p className="text-red-500 text-sm text-center">{error}</p>}
-          <Input type="email" placeholder="Email" value={email} onChange={(e) => setEmail(e.target.value)} />
-          <Input type="password" placeholder="Password" value={password} onChange={(e) => setPassword(e.target.value)} />
+          <Input type="email" placeholder="E-mail" value={email} onChange={(e) => setEmail(e.target.value)} />
+          <Input type="password" placeholder="Senha" value={password} onChange={(e) => setPassword(e.target.value)} />
           <Button onClick={handleAuthAction} className="w-full">
-            {isSignUp ? 'Sign Up' : 'Sign In'}
+            {isSignUp ? 'Cadastre-se' : 'Entrar'}
           </Button>
           <Button variant="link" onClick={() => { setIsSignUp(!isSignUp); setError(''); }} className="w-full">
-            {isSignUp ? 'Already have an account? Sign In' : "Don't have an account? Sign Up"}
+            {isSignUp ? 'Já tem uma conta? Faça login' : "Ainda não tem uma conta? Cadastre-se."}
           </Button>
         </CardContent>
       </Card>
@@ -749,7 +781,7 @@ export default function IDriveApp() {
       <div className="container mx-auto p-4 max-w-4xl">
         <header className="flex justify-between items-center py-4 mb-6">
           <div className="flex items-center gap-2">
-            <Car className="text-primary h-8 w-8" />
+            <DriveWiseIcon className="text-primary h-8 w-8" />
             <h1 className="text-2xl font-bold">DriveWise</h1>
           </div>
           <DropdownMenu>
@@ -781,7 +813,7 @@ export default function IDriveApp() {
         {renderView()}
         <nav className="fixed bottom-0 left-0 right-0 bg-card border-t border-border flex justify-around p-2">
             <Button variant={view === 'Home' ? "secondary" : "ghost"} onClick={() => setView('Home')} className="flex flex-col h-auto">
-                <Car/>
+                <DriveWiseIcon className="h-6 w-6"/>
                 <span>Principal</span>
             </Button>
             <Button variant={view === 'Settings' ? "secondary" : "ghost"} onClick={() => setView('Settings')} className="flex flex-col h-auto">

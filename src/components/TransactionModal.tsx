@@ -123,9 +123,9 @@ export function TransactionModal({
     <Dialog open={isOpen} onOpenChange={onClose}>
       <DialogContent>
         <DialogHeader>
-          <DialogTitle>{isEditMode ? 'Edit Transaction' : 'New Transaction'}</DialogTitle>
+          <DialogTitle>{isEditMode ? 'Editar Transação' : 'Nova Transação'}</DialogTitle>
           <DialogDescription>
-            {isEditMode ? 'Update the details of your transaction.' : 'Add a new revenue or expense to your records.'}
+            {isEditMode ? 'Atualize os detalhes da transação.' : 'Adicione uma nova Corrida ou Despesa.'}
           </DialogDescription>
         </DialogHeader>
         <Form {...form}>
@@ -148,13 +148,13 @@ export function TransactionModal({
                         <FormControl>
                           <RadioGroupItem value="Revenue" />
                         </FormControl>
-                        <FormLabel className="font-normal">Revenue</FormLabel>
+                        <FormLabel className="font-normal">Corrida</FormLabel>
                       </FormItem>
                       <FormItem className="flex items-center space-x-2 space-y-0">
                         <FormControl>
                           <RadioGroupItem value="Expense" />
                         </FormControl>
-                        <FormLabel className="font-normal">Expense</FormLabel>
+                        <FormLabel className="font-normal">Despesa</FormLabel>
                       </FormItem>
                     </RadioGroup>
                   </FormControl>
@@ -168,7 +168,7 @@ export function TransactionModal({
               name="amount"
               render={({ field }) => (
                 <FormItem>
-                  <FormLabel>Amount</FormLabel>
+                  <FormLabel>Valor</FormLabel>
                   <FormControl>
                     <CurrencyInput
                       value={field.value || 0}
@@ -186,11 +186,11 @@ export function TransactionModal({
               name="categoryOrAppId"
               render={({ field }) => (
                 <FormItem>
-                  <FormLabel>{transactionType === 'Revenue' ? 'Ride App' : 'Category'}</FormLabel>
+                  <FormLabel>{transactionType === 'Revenue' ? 'App Corrida' : 'Categoria'}</FormLabel>
                   <Select onValueChange={field.onChange} defaultValue={field.value}>
                     <FormControl>
                       <SelectTrigger>
-                        <SelectValue placeholder={`Select a ${transactionType === 'Revenue' ? 'ride app' : 'category'}`} />
+                        <SelectValue placeholder={`Selecione ${transactionType === 'Revenue' ? 'um aplicativo' : 'uma categoria'}`} />
                       </SelectTrigger>
                     </FormControl>
                     <SelectContent>
@@ -210,9 +210,9 @@ export function TransactionModal({
                 name="description"
                 render={({ field }) => (
                   <FormItem>
-                    <FormLabel>Description</FormLabel>
+                    <FormLabel>Descrição</FormLabel>
                     <FormControl>
-                      <Input placeholder="e.g., Gas, Lunch" {...field} />
+                      <Input placeholder="Ex.:, Combustível, almoço" {...field} />
                     </FormControl>
                     <FormMessage />
                   </FormItem>
@@ -226,7 +226,7 @@ export function TransactionModal({
                 name="tripCount"
                 render={({ field }) => (
                   <FormItem>
-                    <FormLabel>Trip Count</FormLabel>
+                    <FormLabel>Quantas Corridas</FormLabel>
                     <FormControl>
                        <Input 
                          type="number" 
@@ -241,8 +241,8 @@ export function TransactionModal({
             )}
 
             <DialogFooter>
-              <Button type="button" variant="outline" onClick={onClose}>Cancel</Button>
-              <Button type="submit">Save</Button>
+              <Button type="button" variant="outline" onClick={onClose}>Cancelar</Button>
+              <Button type="submit">Salvar</Button>
             </DialogFooter>
           </form>
         </Form>
