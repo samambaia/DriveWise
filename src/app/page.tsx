@@ -1,3 +1,4 @@
+
 'use client';
 
 import { useState, useEffect, useMemo } from 'react';
@@ -159,11 +160,20 @@ const Settings = ({ categories, rideApps, activePeriod, userId }: any) => {
         return adjustedDate.toISOString().split('T')[0];
     }
     
-    // State for the form fields, initialized once
-    const [startDate, setStartDate] = useState(() => toLocalDateString(activePeriod?.startDate?.toDate()));
-    const [endDate, setEndDate] = useState(() => toLocalDateString(activePeriod?.endDate?.toDate()));
-    const [initialBalance, setInitialBalance] = useState<number | undefined>(() => activePeriod?.initialBalance || 0);
-    const [targetBalance, setTargetBalance] = useState<number | undefined>(() => activePeriod?.targetBalance || 0);
+    // State for the form fields
+    const [startDate, setStartDate] = useState('');
+    const [endDate, setEndDate] = useState('');
+    const [initialBalance, setInitialBalance] = useState<number | undefined>(0);
+    const [targetBalance, setTargetBalance] = useState<number | undefined>(0);
+
+    // Effect to sync form state with the activePeriod prop
+    useEffect(() => {
+        setStartDate(toLocalDateString(activePeriod?.startDate?.toDate()));
+        setEndDate(toLocalDateString(activePeriod?.endDate?.toDate()));
+        setInitialBalance(activePeriod?.initialBalance || 0);
+        setTargetBalance(activePeriod?.targetBalance || 0);
+    }, [activePeriod]);
+
 
     const handleAddCategory = async () => {
         if (newCategory.trim() === '' || !firestore) return;
@@ -238,6 +248,7 @@ const Settings = ({ categories, rideApps, activePeriod, userId }: any) => {
             const newPeriodRef = doc(collection(firestore, `users/${userId}/periods`));
             
             // Parse date strings as local dates and convert to Timestamps
+            // This ensures the date is not affected by timezone shifts
             const startTimestamp = Timestamp.fromDate(new Date(`${startDate}T00:00:00`));
             const endTimestamp = Timestamp.fromDate(new Date(`${endDate}T23:59:59`));
 
@@ -380,19 +391,20 @@ const History = ({ allPeriods, userId, categories, rideApps, onEditTransaction }
         if (!transactionToDelete || !firestore || !userId) return;
         try {
             await deleteDoc(doc(firestore, `users/${userId}/periods/${transactionToDelete.periodId}/transactions`, transactionToDelete.id));
-            setTransactionToDelete(null);
             toast({
-                title: "Success",
-                description: "Transaction deleted successfully.",
+                title: "Transaction Deleted",
+                description: "The transaction was successfully removed.",
                 variant: "default",
             });
         } catch (error) {
             console.error("Error deleting transaction: ", error);
             toast({
-                title: "Error",
-                description: "Could not delete transaction. Please try again.",
+                title: "Deletion Failed",
+                description: "Could not delete the transaction. Please try again.",
                 variant: "destructive",
             });
+        } finally {
+            setTransactionToDelete(null);
         }
     };
     
