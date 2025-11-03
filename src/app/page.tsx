@@ -1,5 +1,3 @@
-
-
 'use client';
 
 import { useState, useEffect, useMemo } from 'react';
@@ -112,14 +110,14 @@ const Dashboard = ({ transactions, activePeriod, onOpenRevenue, onOpenExpense }:
       )}
 
       <div className="grid grid-cols-1 md:grid-cols-2 gap-4">
-        <Button onClick={onOpenRevenue} className="p-6 text-lg"><PlusCircle className="mr-2"/> Corrida (Receita)</Button>
+        <Button onClick={onOpenRevenue} className="p-6 text-lg"><PlusCircle className="mr-2"/> Receita (Corridas)</Button>
         <Button onClick={onOpenExpense} variant="destructive" className="p-6 text-lg"><MinusCircle className="mr-2"/> Despesa</Button>
       </div>
 
       <div className="grid grid-cols-1 md:grid-cols-3 gap-4">
         <Card>
           <CardHeader>
-            <CardTitle>Total Trips</CardTitle>
+            <CardTitle>Total Corridas</CardTitle>
           </CardHeader>
           <CardContent>
             <p className="text-2xl font-bold">{totalTrips}</p>
@@ -127,7 +125,7 @@ const Dashboard = ({ transactions, activePeriod, onOpenRevenue, onOpenExpense }:
         </Card>
         <Card>
           <CardHeader>
-            <CardTitle>Total Corridas</CardTitle>
+            <CardTitle>Total Receitas</CardTitle>
           </CardHeader>
           <CardContent>
             <p className="text-2xl font-bold text-green-400">{formatCurrency(totalRevenue)}</p>
@@ -148,22 +146,24 @@ const Dashboard = ({ transactions, activePeriod, onOpenRevenue, onOpenExpense }:
 
 const Settings = ({ categories, rideApps, activePeriod, userId }: any) => {
     const { firestore } = useFirebase();
+    const { toast } = useToast();
     const [newCategory, setNewCategory] = useState('');
     const [newRideApp, setNewRideApp] = useState('');
+    const [isSavingPeriod, setIsSavingPeriod] = useState(false);
 
-    const [startDate, setStartDate] = useState('');
-    const [endDate, setEndDate] = useState('');
-    const [initialBalance, setInitialBalance] = useState<number | undefined>(0);
-    const [targetBalance, setTargetBalance] = useState<number | undefined>(0);
+    // Helper to get YYYY-MM-DD from a Date object, respecting local timezone
+    const toLocalDateString = (date: Date | null | undefined) => {
+        if (!date) return '';
+        // Create a new date object that is timezone-offset adjusted
+        const adjustedDate = new Date(date.getTime() - (date.getTimezoneOffset() * 60000));
+        return adjustedDate.toISOString().split('T')[0];
+    }
     
-    useEffect(() => {
-        if (activePeriod) {
-            setStartDate(activePeriod.startDate?.toDate().toISOString().split('T')[0] || '');
-            setEndDate(activePeriod.endDate?.toDate().toISOString().split('T')[0] || '');
-            setInitialBalance(activePeriod.initialBalance || 0);
-            setTargetBalance(activePeriod.targetBalance || 0);
-        }
-    }, [activePeriod]);
+    // State for the form fields, initialized once
+    const [startDate, setStartDate] = useState(() => toLocalDateString(activePeriod?.startDate?.toDate()));
+    const [endDate, setEndDate] = useState(() => toLocalDateString(activePeriod?.endDate?.toDate()));
+    const [initialBalance, setInitialBalance] = useState<number | undefined>(() => activePeriod?.initialBalance || 0);
+    const [targetBalance, setTargetBalance] = useState<number | undefined>(() => activePeriod?.targetBalance || 0);
 
     const handleAddCategory = async () => {
         if (newCategory.trim() === '' || !firestore) return;
@@ -171,8 +171,10 @@ const Settings = ({ categories, rideApps, activePeriod, userId }: any) => {
             const newCatRef = doc(collection(firestore, 'categories'));
             await setDoc(newCatRef, { id: newCatRef.id, name: newCategory });
             setNewCategory('');
+             toast({ title: "Categoria Adicionada", description: `"${newCategory}" foi adicionado.` });
         } catch (e) {
             console.error("Error adding category: ", e);
+            toast({ title: "Erro", description: "Não foi possível adicionar a categoria.", variant: "destructive" });
         }
     };
     
@@ -180,8 +182,10 @@ const Settings = ({ categories, rideApps, activePeriod, userId }: any) => {
         if (!firestore) return;
         try {
             await deleteDoc(doc(firestore, 'categories', categoryId));
+            toast({ title: "Categoria Deletada", description: "A categoria foi removida." });
         } catch (e) {
             console.error("Error deleting category: ", e);
+            toast({ title: "Erro", description: "Não foi possível deletar a categoria.", variant: "destructive" });
         }
     };
     
@@ -191,8 +195,10 @@ const Settings = ({ categories, rideApps, activePeriod, userId }: any) => {
             const newAppRef = doc(collection(firestore, 'rideApps'));
             await setDoc(newAppRef, { id: newAppRef.id, name: newRideApp });
             setNewRideApp('');
+            toast({ title: "App de Corrida Adicionado", description: `"${newRideApp}" foi adicionado.` });
         } catch (e) {
             console.error("Error adding ride app: ", e);
+            toast({ title: "Erro", description: "Não foi possível adicionar o app de corrida.", variant: "destructive" });
         }
     };
 
@@ -200,21 +206,29 @@ const Settings = ({ categories, rideApps, activePeriod, userId }: any) => {
         if (!firestore) return;
         try {
             await deleteDoc(doc(firestore, 'rideApps', appId));
+            toast({ title: "App de Corrida Deletado", description: "O app de corrida foi removido." });
         } catch(e) {
             console.error("Error deleting ride app: ", e);
+            toast({ title: "Erro", description: "Não foi possível deletar o app de corrida.", variant: "destructive" });
         }
     };
 
     const handleActivateNewPeriod = async () => {
         if (!startDate || !endDate || initialBalance === undefined || targetBalance === undefined || !firestore || !userId) {
-            alert("Please fill all period fields.");
+            toast({
+                title: "Campos Incompletos",
+                description: "Por favor, preencha todos os campos do período.",
+                variant: "destructive",
+            });
             return;
         }
+
+        setIsSavingPeriod(true);
 
         try {
             const batch = writeBatch(firestore);
 
-            // Deactivate current active period
+            // Deactivate current active period if it exists
             if (activePeriod) {
                 const oldPeriodRef = doc(firestore, `users/${userId}/periods`, activePeriod.id);
                 batch.update(oldPeriodRef, { isActive: false });
@@ -222,21 +236,35 @@ const Settings = ({ categories, rideApps, activePeriod, userId }: any) => {
 
             // Create new active period
             const newPeriodRef = doc(collection(firestore, `users/${userId}/periods`));
+            
+            // Parse date strings as local dates and convert to Timestamps
+            const startTimestamp = Timestamp.fromDate(new Date(`${startDate}T00:00:00`));
+            const endTimestamp = Timestamp.fromDate(new Date(`${endDate}T23:59:59`));
+
             batch.set(newPeriodRef, {
                 id: newPeriodRef.id,
-                startDate: Timestamp.fromDate(new Date(startDate)),
-                endDate: Timestamp.fromDate(new Date(endDate)),
+                startDate: startTimestamp,
+                endDate: endTimestamp,
                 initialBalance: initialBalance,
                 targetBalance: targetBalance,
                 isActive: true,
             });
 
             await batch.commit();
-            alert("New period activated!");
+            toast({
+                title: "Período Ativado!",
+                description: "O novo período foi iniciado com sucesso."
+            });
             
         } catch (e) {
             console.error("Error activating new period: ", e);
-            alert("Failed to activate new period.");
+            toast({
+                title: "Erro ao Ativar Período",
+                description: "Ocorreu um erro ao salvar o novo período. Tente novamente.",
+                variant: "destructive",
+            });
+        } finally {
+            setIsSavingPeriod(false);
         }
     };
     
@@ -265,7 +293,9 @@ const Settings = ({ categories, rideApps, activePeriod, userId }: any) => {
                         <CurrencyInput id="targetBalance" value={targetBalance || 0} onValueChange={(value) => setTargetBalance(value)} placeholder="Objetivo Período" />
                       </div>
                     </div>
-                    <Button onClick={handleActivateNewPeriod}>{activePeriod ? 'Ativar Novo Período' : 'Ativar Período'}</Button>
+                    <Button onClick={handleActivateNewPeriod} disabled={isSavingPeriod}>
+                        {isSavingPeriod ? 'Salvando...' : (activePeriod ? 'Ativar Novo Período' : 'Ativar Período')}
+                    </Button>
                     <p className="text-xs text-muted-foreground">Nota: Ativar um novo período vai arquivar o atual.</p>
                 </CardContent>
             </Card>
@@ -769,6 +799,3 @@ export default function IDriveApp() {
     </div>
   );
 }
-
-    
-
