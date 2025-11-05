@@ -199,6 +199,7 @@ const Settings = ({ categories, rideApps, activePeriod, userId }: any) => {
             setInitialBalance(activePeriod.initialBalance || 0);
             setTargetBalance(activePeriod.targetBalance || 0);
         } else {
+            // If there's no active period, clear the fields
             setStartDate('');
             setEndDate('');
             setInitialBalance(0);
@@ -237,22 +238,6 @@ const Settings = ({ categories, rideApps, activePeriod, userId }: any) => {
     const handleDeleteCategory = async (categoryId: string) => {
         if (!firestore) return;
         try {
-            const transactionsQuery = query(
-                collectionGroup(firestore, 'transactions'),
-                where('categoryOrAppId', '==', categoryId),
-                limit(1)
-            );
-            const querySnapshot = await getDocs(transactionsQuery);
-
-            if (!querySnapshot.empty) {
-                toast({
-                    title: "Exclusão Bloqueada",
-                    description: "Esta categoria não pode ser removida pois está associada a uma ou mais transações.",
-                    variant: "destructive",
-                });
-                return;
-            }
-
             await deleteDoc(doc(firestore, 'categories', categoryId));
             toast({ title: "Categoria Deletada", description: "A categoria foi removida." });
         } catch (e) {
@@ -291,21 +276,6 @@ const Settings = ({ categories, rideApps, activePeriod, userId }: any) => {
     const handleDeleteRideApp = async (appId: string) => {
         if (!firestore) return;
         try {
-            const transactionsQuery = query(
-                collectionGroup(firestore, 'transactions'),
-                where('categoryOrAppId', '==', appId),
-                limit(1)
-            );
-            const querySnapshot = await getDocs(transactionsQuery);
-
-            if (!querySnapshot.empty) {
-                toast({
-                    title: "Exclusão Bloqueada",
-                    description: "Este app de corrida não pode ser removido pois está associado a uma ou mais transações.",
-                    variant: "destructive",
-                });
-                return;
-            }
             await deleteDoc(doc(firestore, 'rideApps', appId));
             toast({ title: "App de Corrida Deletado", description: "O app de corrida foi removido." });
         } catch(e) {
@@ -338,7 +308,6 @@ const Settings = ({ categories, rideApps, activePeriod, userId }: any) => {
 
             const newPeriodRef = doc(collection(firestore, `users/${userId}/periods`));
             
-            // Ensure dates are parsed correctly, avoiding timezone pitfalls
             const startTimestamp = Timestamp.fromDate(new Date(`${startDate}T00:00:00`));
             const endTimestamp = Timestamp.fromDate(new Date(`${endDate}T23:59:59`));
 
@@ -1024,3 +993,5 @@ export default function IDriveApp() {
     </div>
   );
 }
+
+    
