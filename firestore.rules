@@ -33,7 +33,7 @@ service cloud.firestore {
      */
     match /categories/{categoryId} {
       allow get, list: if true;
-      allow create, update, delete: if request.auth != null && request.auth.token.firebase.sign_in_provider != 'anonymous';
+      allow create, update, delete: if request.auth != null;
     }
 
     /**
@@ -45,7 +45,7 @@ service cloud.firestore {
      */
     match /rideApps/{rideAppId} {
       allow get, list: if true;
-      allow create, update, delete: if request.auth != null && request.auth.token.firebase.sign_in_provider != 'anonymous';
+      allow create, update, delete: if request.auth != null;
     }
 
     /**
