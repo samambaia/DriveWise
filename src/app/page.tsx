@@ -18,6 +18,8 @@ import {
   writeBatch,
   orderBy,
   setDoc,
+  collectionGroup,
+  limit,
 } from 'firebase/firestore';
 import { signOut, createUserWithEmailAndPassword, signInWithEmailAndPassword, sendPasswordResetEmail } from 'firebase/auth';
 import { BarChart, Bar, XAxis, YAxis, Tooltip, ResponsiveContainer, PieChart, Pie, Cell } from 'recharts';
@@ -55,26 +57,27 @@ const formatCurrency = (value: number) => {
 // #region Components
 
 const DriveWiseIcon = (props: React.SVGProps<SVGSVGElement>) => (
-    <svg 
-        xmlns="http://www.w3.org/2000/svg" 
-        viewBox="0 0 24 24" 
-        fill="none" 
-        stroke="currentColor" 
-        strokeWidth="2" 
-        strokeLinecap="round" 
-        strokeLinejoin="round" 
-        {...props}
+    <svg
+      xmlns="http://www.w3.org/2000/svg"
+      viewBox="0 0 24 24"
+      fill="none"
+      stroke="currentColor"
+      strokeWidth="2"
+      strokeLinecap="round"
+      strokeLinejoin="round"
+      {...props}
     >
-        <path d="M12 22c5.523 0 10-4.477 10-10S17.523 2 12 2 2 6.477 2 12s4.477 10 10 10z"/>
-        <path d="M12 12m-3 0a3 3 0 1 0 6 0 3 3 0 1 0-6 0"/>
-        <path d="M12 4.5V9"/>
-        <path d="m16.5 7.5-.866.5"/>
-        <path d="M20 12h-4.5"/>
-        <path d="m16.5 16.5-.866-.5"/>
-        <path d="M12 19.5V15"/>
-        <path d="m7.5 16.5.866-.5"/>
-        <path d="M4 12h4.5"/>
-        <path d="m7.5 7.5.866.5"/>
+      <path d="M14.5 16.5a2.5 2.5 0 1 0 0-5 2.5 2.5 0 0 0 0 5z" />
+      <path d="M8.83 19.17a3 3 0 0 1-2.07-5.11l2.55-2.55a1 1 0 0 1 1.41 0l2.55 2.55a3 3 0 0 1-2.07 5.11z" />
+      <path d="M12 2a10 10 0 1 0 10 10" />
+      <path d="M12 12v-2" />
+      <path d="m16.24 7.76-.71.71" />
+      <path d="M18 12h-2" />
+      <path d="m16.24 16.24-.71-.71" />
+      <path d="M12 18v-2" />
+      <path d="m7.76 16.24.71-.71" />
+      <path d="M6 12H4" />
+      <path d="m7.76 7.76.71.71" />
     </svg>
 );
 
@@ -176,17 +179,18 @@ const Settings = ({ categories, rideApps, activePeriod, userId }: any) => {
     const [newCategory, setNewCategory] = useState('');
     const [newRideApp, setNewRideApp] = useState('');
     const [isSavingPeriod, setIsSavingPeriod] = useState(false);
-
-    const toLocalDateString = (date: Date | null | undefined) => {
-        if (!date) return '';
-        const adjustedDate = new Date(date.getTime() - (date.getTimezoneOffset() * 60000));
-        return adjustedDate.toISOString().split('T')[0];
-    }
     
     const [startDate, setStartDate] = useState('');
     const [endDate, setEndDate] = useState('');
     const [initialBalance, setInitialBalance] = useState<number | undefined>(0);
     const [targetBalance, setTargetBalance] = useState<number | undefined>(0);
+
+    const toLocalDateString = (date: Date | null | undefined) => {
+        if (!date) return '';
+        // Adjust for timezone offset before converting to ISO string
+        const adjustedDate = new Date(date.getTime() - (date.getTimezoneOffset() * 60000));
+        return adjustedDate.toISOString().split('T')[0];
+    }
 
     useEffect(() => {
         if (activePeriod) {
@@ -219,6 +223,22 @@ const Settings = ({ categories, rideApps, activePeriod, userId }: any) => {
     const handleDeleteCategory = async (categoryId: string) => {
         if (!firestore) return;
         try {
+            const transactionsQuery = query(
+                collectionGroup(firestore, 'transactions'),
+                where('categoryOrAppId', '==', categoryId),
+                limit(1)
+            );
+            const querySnapshot = await getDocs(transactionsQuery);
+
+            if (!querySnapshot.empty) {
+                toast({
+                    title: "Exclusão Bloqueada",
+                    description: "Esta categoria não pode ser removida pois está associada a uma ou mais transações.",
+                    variant: "destructive",
+                });
+                return;
+            }
+
             await deleteDoc(doc(firestore, 'categories', categoryId));
             toast({ title: "Categoria Deletada", description: "A categoria foi removida." });
         } catch (e) {
@@ -243,6 +263,21 @@ const Settings = ({ categories, rideApps, activePeriod, userId }: any) => {
     const handleDeleteRideApp = async (appId: string) => {
         if (!firestore) return;
         try {
+            const transactionsQuery = query(
+                collectionGroup(firestore, 'transactions'),
+                where('categoryOrAppId', '==', appId),
+                limit(1)
+            );
+            const querySnapshot = await getDocs(transactionsQuery);
+
+            if (!querySnapshot.empty) {
+                toast({
+                    title: "Exclusão Bloqueada",
+                    description: "Este app de corrida não pode ser removido pois está associado a uma ou mais transações.",
+                    variant: "destructive",
+                });
+                return;
+            }
             await deleteDoc(doc(firestore, 'rideApps', appId));
             toast({ title: "App de Corrida Deletado", description: "O app de corrida foi removido." });
         } catch(e) {
@@ -266,13 +301,16 @@ const Settings = ({ categories, rideApps, activePeriod, userId }: any) => {
         try {
             const batch = writeBatch(firestore);
 
-            if (activePeriod) {
-                const oldPeriodRef = doc(firestore, `users/${userId}/periods`, activePeriod.id);
-                batch.update(oldPeriodRef, { isActive: false });
-            }
+            // Deactivate all existing periods for the user
+            const periodsQuery = query(collection(firestore, `users/${userId}/periods`), where("isActive", "==", true));
+            const activePeriodsSnapshot = await getDocs(periodsQuery);
+            activePeriodsSnapshot.forEach(periodDoc => {
+                batch.update(periodDoc.ref, { isActive: false });
+            });
 
             const newPeriodRef = doc(collection(firestore, `users/${userId}/periods`));
             
+            // Ensure dates are parsed correctly, avoiding timezone pitfalls
             const startTimestamp = Timestamp.fromDate(new Date(`${startDate}T00:00:00`));
             const endTimestamp = Timestamp.fromDate(new Date(`${endDate}T23:59:59`));
 
