@@ -19,14 +19,14 @@ import {
   orderBy,
   setDoc,
 } from 'firebase/firestore';
-import { signOut, createUserWithEmailAndPassword, signInWithEmailAndPassword } from 'firebase/auth';
+import { signOut, createUserWithEmailAndPassword, signInWithEmailAndPassword, sendPasswordResetEmail } from 'firebase/auth';
 import { BarChart, Bar, XAxis, YAxis, Tooltip, ResponsiveContainer, PieChart, Pie, Cell } from 'recharts';
 import { PlusCircle, MinusCircle, Settings as SettingsIcon, History as HistoryIcon, Edit, Trash2, ArrowLeft, MoreVertical, LogOut, CheckCircle, AlertTriangle, User as UserIcon, Eye, EyeOff } from 'lucide-react';
 import { Button } from '@/components/ui/button';
 import { Card, CardContent, CardHeader, CardTitle, CardDescription } from '@/components/ui/card';
 import { Input } from '@/components/ui/input';
 import { Select, SelectContent, SelectItem, SelectTrigger, SelectValue } from '@/components/ui/select';
-import { Dialog, DialogContent, DialogHeader, DialogTitle, DialogFooter } from '@/components/ui/dialog';
+import { Dialog, DialogContent, DialogHeader, DialogTitle, DialogFooter, DialogDescription } from '@/components/ui/dialog';
 import { AlertDialog, AlertDialogAction, AlertDialogCancel, AlertDialogContent, AlertDialogDescription, AlertDialogFooter, AlertDialogHeader, AlertDialogTitle } from '@/components/ui/alert-dialog';
 import { Progress } from '@/components/ui/progress';
 import { Avatar, AvatarFallback, AvatarImage } from "@/components/ui/avatar"
@@ -177,20 +177,17 @@ const Settings = ({ categories, rideApps, activePeriod, userId }: any) => {
     const [newRideApp, setNewRideApp] = useState('');
     const [isSavingPeriod, setIsSavingPeriod] = useState(false);
 
-    // Helper to get YYYY-MM-DD from a Date object, respecting local timezone
     const toLocalDateString = (date: Date | null | undefined) => {
         if (!date) return '';
         const adjustedDate = new Date(date.getTime() - (date.getTimezoneOffset() * 60000));
         return adjustedDate.toISOString().split('T')[0];
     }
     
-    // State for the form fields
-    const [startDate, setStartDate] = useState<string>('');
-    const [endDate, setEndDate] = useState<string>('');
+    const [startDate, setStartDate] = useState('');
+    const [endDate, setEndDate] = useState('');
     const [initialBalance, setInitialBalance] = useState<number | undefined>(0);
     const [targetBalance, setTargetBalance] = useState<number | undefined>(0);
 
-    // Effect to sync form state with the activePeriod prop
     useEffect(() => {
         if (activePeriod) {
             setStartDate(toLocalDateString(activePeriod.startDate?.toDate()));
@@ -198,7 +195,6 @@ const Settings = ({ categories, rideApps, activePeriod, userId }: any) => {
             setInitialBalance(activePeriod.initialBalance || 0);
             setTargetBalance(activePeriod.targetBalance || 0);
         } else {
-            // Set default empty/zero values if there's no active period
             setStartDate('');
             setEndDate('');
             setInitialBalance(0);
@@ -270,17 +266,13 @@ const Settings = ({ categories, rideApps, activePeriod, userId }: any) => {
         try {
             const batch = writeBatch(firestore);
 
-            // Deactivate current active period if it exists
             if (activePeriod) {
                 const oldPeriodRef = doc(firestore, `users/${userId}/periods`, activePeriod.id);
                 batch.update(oldPeriodRef, { isActive: false });
             }
 
-            // Create new active period
             const newPeriodRef = doc(collection(firestore, `users/${userId}/periods`));
             
-            // Parse date strings as local dates and convert to Timestamps
-            // This ensures the date is not affected by timezone shifts
             const startTimestamp = Timestamp.fromDate(new Date(`${startDate}T00:00:00`));
             const endTimestamp = Timestamp.fromDate(new Date(`${endDate}T23:59:59`));
 
@@ -424,15 +416,14 @@ const History = ({ allPeriods, userId, categories, rideApps, onEditTransaction }
         try {
             await deleteDoc(doc(firestore, `users/${userId}/periods/${transactionToDelete.periodId}/transactions`, transactionToDelete.id));
             toast({
-                title: "Transaction Deleted",
+                title: "Transação Deletada",
                 description: "A transação foi removida com sucesso.",
-                variant: "default",
             });
         } catch (error) {
             console.error("Error deleting transaction: ", error);
             toast({
-                title: "Deletion Failed",
-                description: "Não pude deletar a transação. Tente novamente.",
+                title: "Falha na Deleção",
+                description: "Não foi possível deletar a transação. Verifique as regras de segurança do Firestore.",
                 variant: "destructive",
             });
         } finally {
@@ -586,8 +577,46 @@ const History = ({ allPeriods, userId, categories, rideApps, onEditTransaction }
     );
 };
 
+const ForgotPasswordDialog = ({ isOpen, onOpenChange, onSendResetEmail }: { isOpen: boolean, onOpenChange: (open: boolean) => void, onSendResetEmail: (email: string) => void }) => {
+    const [email, setEmail] = useState('');
+
+    const handleSendClick = () => {
+        onSendResetEmail(email);
+    };
+
+    return (
+        <Dialog open={isOpen} onOpenChange={onOpenChange}>
+            <DialogContent>
+                <DialogHeader>
+                    <DialogTitle>Recuperar Senha</DialogTitle>
+                    <DialogDescription>
+                        Digite seu e-mail e enviaremos um link para redefinir sua senha.
+                    </DialogDescription>
+                </DialogHeader>
+                <div className="space-y-4 py-2 pb-4">
+                    <div className="space-y-2">
+                        <Label htmlFor="email">E-mail</Label>
+                        <Input
+                            id="email"
+                            type="email"
+                            placeholder="seu@email.com"
+                            value={email}
+                            onChange={(e) => setEmail(e.target.value)}
+                        />
+                    </div>
+                </div>
+                <DialogFooter>
+                    <Button variant="outline" onClick={() => onOpenChange(false)}>Cancelar</Button>
+                    <Button onClick={handleSendClick}>Enviar Link</Button>
+                </DialogFooter>
+            </DialogContent>
+        </Dialog>
+    );
+};
+
 const LoginScreen = () => {
   const { auth } = useFirebase();
+  const { toast } = useToast();
   const [email, setEmail] = useState('');
   const [password, setPassword] = useState('');
   const [confirmPassword, setConfirmPassword] = useState('');
@@ -595,6 +624,7 @@ const LoginScreen = () => {
   const [error, setError] = useState('');
   const [showPassword, setShowPassword] = useState(false);
   const [showConfirmPassword, setShowConfirmPassword] = useState(false);
+  const [isForgotPasswordOpen, setIsForgotPasswordOpen] = useState(false);
 
   const handleAuthAction = async () => {
     if (!auth || !email || !password) {
@@ -619,64 +649,105 @@ const LoginScreen = () => {
       console.error("Authentication error:", e);
     }
   };
+  
+  const handlePasswordReset = async (resetEmail: string) => {
+    if (!auth || !resetEmail) {
+        toast({
+            title: "Email Necessário",
+            description: "Por favor, digite seu endereço de e-mail.",
+            variant: "destructive",
+        });
+        return;
+    }
+    try {
+        await sendPasswordResetEmail(auth, resetEmail);
+        toast({
+            title: "Link Enviado",
+            description: "Verifique sua caixa de entrada para o link de redefinição de senha.",
+        });
+        setIsForgotPasswordOpen(false);
+    } catch (e: any) {
+        toast({
+            title: "Erro",
+            description: e.message,
+            variant: "destructive",
+        });
+        console.error("Password reset error:", e);
+    }
+  };
+
 
   return (
-    <div className="flex flex-col items-center justify-center min-h-screen -mt-20">
-      <Card className="p-8 w-full max-w-sm">
-        <CardHeader>
-          <CardTitle className="text-2xl text-center">{isSignUp ? 'Criar Conta' : 'Bem vindo de Volta'}</CardTitle>
-          <CardDescription className="text-center">
-            {isSignUp ? 'Entre com seu e-mail e senha pra se registrar.' : 'Faça login para acompanhar suas viagens e finanças.'}
-          </CardDescription>
-        </CardHeader>
-        <CardContent className="space-y-4">
-          {error && <p className="text-red-500 text-sm text-center">{error}</p>}
-          <Input type="email" placeholder="E-mail" value={email} onChange={(e) => setEmail(e.target.value)} />
-          <div className="relative">
-            <Input 
-              type={showPassword ? 'text' : 'password'}
-              placeholder="Senha" 
-              value={password} 
-              onChange={(e) => setPassword(e.target.value)} 
-            />
-            <Button
-              type="button"
-              variant="ghost"
-              size="icon"
-              className="absolute inset-y-0 right-0 h-full px-3"
-              onClick={() => setShowPassword(!showPassword)}
-            >
-              {showPassword ? <EyeOff /> : <Eye />}
-            </Button>
-          </div>
-          {isSignUp && (
+    <>
+      <div className="flex flex-col items-center justify-center min-h-screen -mt-20">
+        <Card className="p-8 w-full max-w-sm">
+          <CardHeader>
+            <CardTitle className="text-2xl text-center">{isSignUp ? 'Criar Conta' : 'Bem vindo de Volta'}</CardTitle>
+            <CardDescription className="text-center">
+              {isSignUp ? 'Entre com seu e-mail e senha pra se registrar.' : 'Faça login para acompanhar suas viagens e finanças.'}
+            </CardDescription>
+          </CardHeader>
+          <CardContent className="space-y-4">
+            {error && <p className="text-red-500 text-sm text-center">{error}</p>}
+            <Input type="email" placeholder="E-mail" value={email} onChange={(e) => setEmail(e.target.value)} />
             <div className="relative">
-              <Input
-                type={showConfirmPassword ? 'text' : 'password'}
-                placeholder="Confirmar Senha"
-                value={confirmPassword}
-                onChange={(e) => setConfirmPassword(e.target.value)}
+              <Input 
+                type={showPassword ? 'text' : 'password'}
+                placeholder="Senha" 
+                value={password} 
+                onChange={(e) => setPassword(e.target.value)} 
               />
               <Button
                 type="button"
                 variant="ghost"
                 size="icon"
                 className="absolute inset-y-0 right-0 h-full px-3"
-                onClick={() => setShowConfirmPassword(!showConfirmPassword)}
+                onClick={() => setShowPassword(!showPassword)}
               >
-                {showConfirmPassword ? <EyeOff /> : <Eye />}
+                {showPassword ? <EyeOff className="w-4 h-4" /> : <Eye className="w-4 h-4" />}
               </Button>
             </div>
-          )}
-          <Button onClick={handleAuthAction} className="w-full">
-            {isSignUp ? 'Cadastre-se' : 'Entrar'}
-          </Button>
-          <Button variant="link" onClick={() => { setIsSignUp(!isSignUp); setError(''); }} className="w-full">
-            {isSignUp ? 'Já tem uma conta? Faça login' : "Ainda não tem uma conta? Cadastre-se."}
-          </Button>
-        </CardContent>
-      </Card>
-    </div>
+            {isSignUp && (
+              <div className="relative">
+                <Input
+                  type={showConfirmPassword ? 'text' : 'password'}
+                  placeholder="Confirmar Senha"
+                  value={confirmPassword}
+                  onChange={(e) => setConfirmPassword(e.target.value)}
+                />
+                <Button
+                  type="button"
+                  variant="ghost"
+                  size="icon"
+                  className="absolute inset-y-0 right-0 h-full px-3"
+                  onClick={() => setShowConfirmPassword(!showConfirmPassword)}
+                >
+                  {showConfirmPassword ? <EyeOff className="w-4 h-4" /> : <Eye className="w-4 h-4" />}
+                </Button>
+              </div>
+            )}
+            <Button onClick={handleAuthAction} className="w-full">
+              {isSignUp ? 'Cadastre-se' : 'Entrar'}
+            </Button>
+
+            {!isSignUp && (
+                 <Button variant="link" onClick={() => setIsForgotPasswordOpen(true)} className="w-full text-sm">
+                    Esqueci minha senha
+                </Button>
+            )}
+
+            <Button variant="link" onClick={() => { setIsSignUp(!isSignUp); setError(''); }} className="w-full">
+              {isSignUp ? 'Já tem uma conta? Faça login' : "Ainda não tem uma conta? Cadastre-se."}
+            </Button>
+          </CardContent>
+        </Card>
+      </div>
+      <ForgotPasswordDialog 
+        isOpen={isForgotPasswordOpen}
+        onOpenChange={setIsForgotPasswordOpen}
+        onSendResetEmail={handlePasswordReset}
+      />
+    </>
   );
 };
 
@@ -887,5 +958,3 @@ export default function IDriveApp() {
     </div>
   );
 }
-
-    
