@@ -209,6 +209,20 @@ const Settings = ({ categories, rideApps, activePeriod, userId }: any) => {
 
     const handleAddCategory = async () => {
         if (newCategory.trim() === '' || !firestore) return;
+        
+        const isDuplicate = categories.some(
+            (cat: any) => cat.name.trim().toLowerCase() === newCategory.trim().toLowerCase()
+        );
+
+        if (isDuplicate) {
+            toast({
+                title: "Categoria Duplicada",
+                description: "Esta categoria já existe.",
+                variant: "destructive",
+            });
+            return;
+        }
+
         try {
             const newCatRef = doc(collection(firestore, 'categories'));
             await setDoc(newCatRef, { id: newCatRef.id, name: newCategory });
@@ -249,6 +263,20 @@ const Settings = ({ categories, rideApps, activePeriod, userId }: any) => {
     
     const handleAddRideApp = async () => {
         if (newRideApp.trim() === '' || !firestore) return;
+
+        const isDuplicate = rideApps.some(
+            (app: any) => app.name.trim().toLowerCase() === newRideApp.trim().toLowerCase()
+        );
+
+        if (isDuplicate) {
+            toast({
+                title: "App de Corrida Duplicado",
+                description: "Este app de corrida já existe.",
+                variant: "destructive",
+            });
+            return;
+        }
+
         try {
             const newAppRef = doc(collection(firestore, 'rideApps'));
             await setDoc(newAppRef, { id: newAppRef.id, name: newRideApp });
