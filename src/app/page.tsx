@@ -21,7 +21,7 @@ import {
 } from 'firebase/firestore';
 import { signOut, createUserWithEmailAndPassword, signInWithEmailAndPassword } from 'firebase/auth';
 import { BarChart, Bar, XAxis, YAxis, Tooltip, ResponsiveContainer, PieChart, Pie, Cell } from 'recharts';
-import { PlusCircle, MinusCircle, Settings as SettingsIcon, History as HistoryIcon, Edit, Trash2, ArrowLeft, MoreVertical, LogOut, CheckCircle, AlertTriangle, User as UserIcon } from 'lucide-react';
+import { PlusCircle, MinusCircle, Settings as SettingsIcon, History as HistoryIcon, Edit, Trash2, ArrowLeft, MoreVertical, LogOut, CheckCircle, AlertTriangle, User as UserIcon, Eye, EyeOff } from 'lucide-react';
 import { Button } from '@/components/ui/button';
 import { Card, CardContent, CardHeader, CardTitle, CardDescription } from '@/components/ui/card';
 import { Input } from '@/components/ui/input';
@@ -590,14 +590,23 @@ const LoginScreen = () => {
   const { auth } = useFirebase();
   const [email, setEmail] = useState('');
   const [password, setPassword] = useState('');
+  const [confirmPassword, setConfirmPassword] = useState('');
   const [isSignUp, setIsSignUp] = useState(false);
   const [error, setError] = useState('');
+  const [showPassword, setShowPassword] = useState(false);
+  const [showConfirmPassword, setShowConfirmPassword] = useState(false);
 
   const handleAuthAction = async () => {
     if (!auth || !email || !password) {
       setError("Por favor, entre com o e-mail e senha.");
       return;
     }
+
+    if (isSignUp && password !== confirmPassword) {
+      setError("As senhas não coincidem.");
+      return;
+    }
+
     setError('');
     try {
       if (isSignUp) {
@@ -623,7 +632,42 @@ const LoginScreen = () => {
         <CardContent className="space-y-4">
           {error && <p className="text-red-500 text-sm text-center">{error}</p>}
           <Input type="email" placeholder="E-mail" value={email} onChange={(e) => setEmail(e.target.value)} />
-          <Input type="password" placeholder="Senha" value={password} onChange={(e) => setPassword(e.target.value)} />
+          <div className="relative">
+            <Input 
+              type={showPassword ? 'text' : 'password'}
+              placeholder="Senha" 
+              value={password} 
+              onChange={(e) => setPassword(e.target.value)} 
+            />
+            <Button
+              type="button"
+              variant="ghost"
+              size="icon"
+              className="absolute inset-y-0 right-0 h-full px-3"
+              onClick={() => setShowPassword(!showPassword)}
+            >
+              {showPassword ? <EyeOff /> : <Eye />}
+            </Button>
+          </div>
+          {isSignUp && (
+            <div className="relative">
+              <Input
+                type={showConfirmPassword ? 'text' : 'password'}
+                placeholder="Confirmar Senha"
+                value={confirmPassword}
+                onChange={(e) => setConfirmPassword(e.target.value)}
+              />
+              <Button
+                type="button"
+                variant="ghost"
+                size="icon"
+                className="absolute inset-y-0 right-0 h-full px-3"
+                onClick={() => setShowConfirmPassword(!showConfirmPassword)}
+              >
+                {showConfirmPassword ? <EyeOff /> : <Eye />}
+              </Button>
+            </div>
+          )}
           <Button onClick={handleAuthAction} className="w-full">
             {isSignUp ? 'Cadastre-se' : 'Entrar'}
           </Button>
@@ -843,3 +887,5 @@ export default function IDriveApp() {
     </div>
   );
 }
+
+    
