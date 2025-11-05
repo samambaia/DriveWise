@@ -10,6 +10,7 @@
  *
  * Key Security Decisions:
  * - Public read access is granted to the 'categories' and 'rideApps' collections to allow all users to access them.
+ * - Authenticated users are allowed to write to 'categories' and 'rideApps'.
  * - Strict user-ownership is enforced for 'periods' and 'transactions'. Users can only access data under their own user ID.
  * - Data consistency is enforced between the path and the document's internal fields for user-owned data.
  * - User listing is disallowed by default.
