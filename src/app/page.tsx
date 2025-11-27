@@ -237,14 +237,14 @@ const Settings = ({ categories, rideApps, activePeriod, userId }: any) => {
     };
     
     const handleDeleteCategory = async (categoryId: string) => {
-        if (!firestore) return;
-        try {
-            await deleteDoc(doc(firestore, 'categories', categoryId));
-            toast({ title: "Categoria Deletada", description: "A categoria foi removida." });
-        } catch (e) {
-            console.error("Error deleting category: ", e);
-            toast({ title: "Erro", description: "Não foi possível deletar a categoria.", variant: "destructive" });
-        }
+      if (!firestore) return;
+      try {
+        await deleteDoc(doc(firestore, 'categories', categoryId));
+        toast({ title: "Categoria Deletada", description: "A categoria foi removida." });
+      } catch (e) {
+        console.error("Error deleting category: ", e);
+        toast({ title: "Erro", description: "Não foi possível deletar a categoria.", variant: "destructive" });
+      }
     };
     
     const handleAddRideApp = async () => {
@@ -275,14 +275,14 @@ const Settings = ({ categories, rideApps, activePeriod, userId }: any) => {
     };
 
     const handleDeleteRideApp = async (appId: string) => {
-        if (!firestore) return;
-        try {
-            await deleteDoc(doc(firestore, 'rideApps', appId));
-            toast({ title: "App de Corrida Deletado", description: "O app de corrida foi removido." });
-        } catch(e) {
-            console.error("Error deleting ride app: ", e);
-            toast({ title: "Erro", description: "Não foi possível deletar o app de corrida.", variant: "destructive" });
-        }
+      if (!firestore) return;
+      try {
+        await deleteDoc(doc(firestore, 'rideApps', appId));
+        toast({ title: "App de Corrida Deletado", description: "O app de corrida foi removido." });
+      } catch (e) {
+        console.error("Error deleting ride app: ", e);
+        toast({ title: "Erro", description: "Não foi possível deletar o app de corrida.", variant: "destructive" });
+      }
     };
 
     const handleActivateNewPeriod = async () => {
@@ -833,12 +833,12 @@ export default function IDriveApp() {
   // Fetch settings (Categories and RideApps)
   useEffect(() => {
     if (!firestore) return;
-    const catUnsub = onSnapshot(collection(firestore, 'categories'), (snapshot) => {
+    const catUnsub = onSnapshot(query(collection(firestore, 'categories'), orderBy('name')), (snapshot) => {
         const catData: any[] = [];
         snapshot.forEach(doc => catData.push({ id: doc.id, ...doc.data() }));
         setCategories(catData);
     });
-    const appUnsub = onSnapshot(collection(firestore, 'rideApps'), (snapshot) => {
+    const appUnsub = onSnapshot(query(collection(firestore, 'rideApps'), orderBy('name')), (snapshot) => {
         const appData: any[] = [];
         snapshot.forEach(doc => appData.push({ id: doc.id, ...doc.data() }));
         setRideApps(appData);
