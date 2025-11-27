@@ -381,9 +381,9 @@ const Settings = ({ categories, rideApps, activePeriod, userId }: any) => {
                     <Input value={newCategory} onChange={e => setNewCategory(e.target.value)} placeholder="Nova Categoria" />
                     <Button onClick={handleAddCategory}>Add</Button>
                   </div>
-                  <ul className="space-y-2">
+                  <ul className="space-y-2 border-t">
                     {categories && categories.map((cat: any) => (
-                      <li key={cat.id} className="flex justify-between items-center bg-input p-2 rounded-md">
+                      <li key={cat.id} className="flex justify-between items-center border-b p-2">
                         <span>{cat.name}</span>
                         <Button variant="ghost" size="icon" onClick={() => handleDeleteCategory(cat.id)}><Trash2 className="h-4 w-4"/></Button>
                       </li>
@@ -401,9 +401,9 @@ const Settings = ({ categories, rideApps, activePeriod, userId }: any) => {
                     <Input value={newRideApp} onChange={e => setNewRideApp(e.target.value)} placeholder="Novo App de Corrida" />
                     <Button onClick={handleAddRideApp}>Add</Button>
                   </div>
-                  <ul className="space-y-2">
+                  <ul className="space-y-2 border-t">
                     {rideApps && rideApps.map((app: any) => (
-                      <li key={app.id} className="flex justify-between items-center bg-input p-2 rounded-md">
+                      <li key={app.id} className="flex justify-between items-center border-b p-2">
                         <span>{app.name}</span>
                          <Button variant="ghost" size="icon" onClick={() => handleDeleteRideApp(app.id)}><Trash2 className="h-4 w-4"/></Button>
                       </li>
