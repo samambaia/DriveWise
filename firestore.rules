@@ -28,24 +28,24 @@ service cloud.firestore {
     /**
      * @description Allows public read access to the categories collection, and write access for authenticated users.
      * @path /categories/{categoryId}
-     * @allow (get, list) All users can read categories.
+     * @allow (read) All users can read categories.
      * @allow (write) Authenticated users can manage categories.
      * @principle Public read access for settings, authenticated write for customization.
      */
     match /categories/{categoryId} {
-      allow get, list: if true;
+      allow read: if true;
       allow write: if request.auth != null;
     }
 
     /**
      * @description Allows public read access to the rideApps collection, and write access for authenticated users.
      * @path /rideApps/{rideAppId}
-     * @allow (get, list) All users can read ride apps.
+     * @allow (read) All users can read ride apps.
      * @allow (write) Authenticated users can manage ride apps.
      * @principle Public read access for settings, authenticated write for customization.
      */
     match /rideApps/{rideAppId} {
-      allow get, list: if true;
+      allow read: if true;
       allow write: if request.auth != null;
     }
 
@@ -118,3 +118,6 @@ service cloud.firestore {
     }
   }
 }
+
+
+    
