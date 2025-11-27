@@ -3,6 +3,40 @@
 'use client';
 
 import { useState, useEffect, useMemo } from 'react';
+import { useTheme } from '@/components/ThemeProvider';
+
+// Type Definitions
+interface Category {
+  id: string;
+  name: string;
+}
+
+interface RideApp {
+  id: string;
+  name: string;
+}
+
+interface Period {
+  id: string;
+  startDate: any;
+  endDate: any;
+  initialBalance: number;
+  targetBalance: number;
+  isActive: boolean;
+}
+
+interface Transaction {
+  id: string;
+  type: 'Revenue' | 'Expense';
+  amount: number;
+  categoryOrAppId: string;
+  description?: string;
+  tripCount?: number;
+  timestamp: any;
+  periodId: string;
+}
+
+type Theme = 'light' | 'dark';
 import { useFirebase, useUser } from '@/firebase';
 import {
   collection,
@@ -14,6 +48,7 @@ import {
   query,
   where,
   getDocs,
+  getDoc,
   Timestamp,
   serverTimestamp,
   writeBatch,
@@ -24,7 +59,7 @@ import {
 } from 'firebase/firestore';
 import { signOut, createUserWithEmailAndPassword, signInWithEmailAndPassword, sendPasswordResetEmail } from 'firebase/auth';
 import { BarChart, Bar, XAxis, YAxis, Tooltip, ResponsiveContainer, PieChart, Pie, Cell } from 'recharts';
-import { PlusCircle, MinusCircle, Settings as SettingsIcon, History as HistoryIcon, Edit, Trash2, ArrowLeft, MoreVertical, LogOut, CheckCircle, AlertTriangle, User as UserIcon, Eye, EyeOff } from 'lucide-react';
+import { PlusCircle, MinusCircle, Settings as SettingsIcon, History as HistoryIcon, Edit, Trash2, ArrowLeft, MoreVertical, LogOut, CheckCircle, AlertTriangle, User as UserIcon, Eye, EyeOff, Sun, Moon } from 'lucide-react';
 import { Button } from '@/components/ui/button';
 import { Card, CardContent, CardHeader, CardTitle, CardDescription } from '@/components/ui/card';
 import { Input } from '@/components/ui/input';
@@ -45,6 +80,7 @@ import { CurrencyInput } from '@/components/ui/CurrencyInput';
 import { TransactionModal } from '@/components/TransactionModal';
 import { useToast } from '@/hooks/use-toast';
 import { Label } from '@/components/ui/label';
+import { Switch } from '@/components/ui/switch';
 
 
 // Helper to format currency
@@ -110,63 +146,67 @@ const Dashboard = ({ transactions, activePeriod, onOpenRevenue, onOpenExpense }:
       
   return (
     <div className="space-y-6">
-      <Card className="bg-card">
+      <Card className="bg-gradient-to-br from-card to-card/50 border-2">
         <CardHeader>
           <CardTitle>Dashboard</CardTitle>
           <CardDescription>Seu resumo financeiro para o período.</CardDescription>
         </CardHeader>
         <CardContent className="text-center">
-            <h2 className="text-sm text-muted-foreground">Saldo Atual</h2>
-            <p className={`text-4xl font-bold ${currentBalance >= 0 ? 'text-primary' : 'text-destructive'}`}>
+            <h2 className="text-sm text-muted-foreground mb-2">Saldo Atual</h2>
+            <p className={`text-5xl font-bold mb-2 ${currentBalance >= 0 ? 'text-primary' : 'text-destructive'}`}>
                 {formatCurrency(currentBalance)}
             </p>
         </CardContent>
       </Card>
       
       {activePeriod && (
-        <Card>
+        <Card className="border-l-4 border-l-primary">
           <CardHeader>
               <CardTitle>Progresso da Meta</CardTitle>
           </CardHeader>
           <CardContent>
-            <Progress value={Math.max(0, Math.min(100, progress))} className="w-full" />
-            <div className="flex justify-between text-sm mt-2 text-muted-foreground">
-              <span>{formatCurrency(initialBalance)}</span>
-              <span className="font-bold">{Math.round(progress)}%</span>
-              <span>{formatCurrency(targetBalance)}</span>
+            <Progress value={Math.max(0, Math.min(100, progress))} className="w-full h-3" />
+            <div className="flex justify-between text-sm mt-3 text-muted-foreground">
+              <span className="font-medium">{formatCurrency(initialBalance)}</span>
+              <span className="font-bold text-primary text-base">{Math.round(progress)}%</span>
+              <span className="font-medium">{formatCurrency(targetBalance)}</span>
             </div>
           </CardContent>
         </Card>
       )}
 
       <div className="grid grid-cols-1 md:grid-cols-2 gap-4">
-        <Button onClick={onOpenRevenue} className="p-6 text-lg"><PlusCircle className="mr-2"/> Receita (Corridas)</Button>
-        <Button onClick={onOpenExpense} variant="destructive" className="p-6 text-lg"><MinusCircle className="mr-2"/> Despesa</Button>
+        <Button onClick={onOpenRevenue} className="p-6 text-lg bg-green-600 hover:bg-green-700">
+          <PlusCircle className="mr-2 h-5 w-5"/> Receita (Corridas)
+        </Button>
+        <Button onClick={onOpenExpense} variant="destructive" className="p-6 text-lg">
+          <MinusCircle className="mr-2 h-5 w-5"/> Despesa
+        </Button>
       </div>
 
       <div className="grid grid-cols-1 md:grid-cols-3 gap-4">
-        <Card>
+        <Card className="border-l-4 border-l-primary">
           <CardHeader>
-            <CardTitle>Total Corridas</CardTitle>
+            <CardTitle className="text-lg">Total Corridas</CardTitle>
           </CardHeader>
           <CardContent>
-            <p className="text-2xl font-bold">{totalTrips}</p>
+            <p className="text-3xl font-bold text-primary">{totalTrips}</p>
           </CardContent>
         </Card>
-        <Card>
+        <Card className="border-l-4 border-l-green-500">
           <CardHeader>
-            <CardTitle>Total Receitas</CardTitle>
+            <CardTitle className="text-lg">Total Receitas</CardTitle>
           </CardHeader>
           <CardContent>
-            <p className="text-2xl font-bold text-green-400">{formatCurrency(totalRevenue)}</p>
+            <p className="text-3xl font-bold text-green-400">{formatCurrency(totalRevenue)}</p>
           </CardContent>
         </Card>
-        <Card>
+        <Card className="border-l-4 border-l-red-500">
           <CardHeader>
-            <CardTitle>Total Despesas</CardTitle>
+            <CardTitle className="text-lg">Total Despesas</CardTitle>
           </CardHeader>
           <CardContent>
-            <p className="text-2xl font-bold text-red-400">{formatCurrency(totalExpenses)}</p>
+            <p className="text-3xl font-bold text-red-400">{formatCurrency(totalExpenses)}</p>
           </CardContent>
         </Card>
       </div>
@@ -174,12 +214,18 @@ const Dashboard = ({ transactions, activePeriod, onOpenRevenue, onOpenExpense }:
   );
 };
 
-const Settings = ({ categories, rideApps, activePeriod, userId }: any) => {
-    const { firestore } = useFirebase();
+const Settings = ({ categories, rideApps, activePeriod, userId, onCategoryDeleted, onRideAppDeleted, theme, onThemeChange }: any) => {
+    const { firestore, auth } = useFirebase();
     const { toast } = useToast();
     const [newCategory, setNewCategory] = useState('');
     const [newRideApp, setNewRideApp] = useState('');
     const [isSavingPeriod, setIsSavingPeriod] = useState(false);
+    const [categoryToDelete, setCategoryToDelete] = useState<Category | null>(null);
+    const [rideAppToDelete, setRideAppToDelete] = useState<RideApp | null>(null);
+    const [isCheckingUsage, setIsCheckingUsage] = useState(false);
+    const [usageCount, setUsageCount] = useState(0);
+    const [categoryUsageCounts, setCategoryUsageCounts] = useState<Record<string, number>>({});
+    const [rideAppUsageCounts, setRideAppUsageCounts] = useState<Record<string, number>>({});
     
     const [startDate, setStartDate] = useState('');
     const [endDate, setEndDate] = useState('');
@@ -207,6 +253,41 @@ const Settings = ({ categories, rideApps, activePeriod, userId }: any) => {
             setTargetBalance(0);
         }
     }, [activePeriod]);
+
+    // Calculate usage counts for categories and ride apps
+    useEffect(() => {
+        if (!firestore || !userId) return;
+        
+        const calculateUsage = async () => {
+            try {
+                const periodsSnapshot = await getDocs(collection(firestore, `users/${userId}/periods`));
+                const catCounts: Record<string, number> = {};
+                const appCounts: Record<string, number> = {};
+                
+                for (const periodDoc of periodsSnapshot.docs) {
+                    const transactionsSnapshot = await getDocs(
+                        collection(firestore, `users/${userId}/periods/${periodDoc.id}/transactions`)
+                    );
+                    
+                    transactionsSnapshot.forEach(transactionDoc => {
+                        const data = transactionDoc.data();
+                        if (data.type === 'Expense') {
+                            catCounts[data.categoryOrAppId] = (catCounts[data.categoryOrAppId] || 0) + 1;
+                        } else if (data.type === 'Revenue') {
+                            appCounts[data.categoryOrAppId] = (appCounts[data.categoryOrAppId] || 0) + 1;
+                        }
+                    });
+                }
+                
+                setCategoryUsageCounts(catCounts);
+                setRideAppUsageCounts(appCounts);
+            } catch (error) {
+                console.error('Error calculating usage:', error);
+            }
+        };
+        
+        calculateUsage();
+    }, [firestore, userId, categories, rideApps]);
 
 
     const handleAddCategory = async () => {
@@ -237,13 +318,65 @@ const Settings = ({ categories, rideApps, activePeriod, userId }: any) => {
     };
     
     const handleDeleteCategory = async (categoryId: string) => {
-      if (!firestore) return;
+      if (!firestore || !userId) return;
+      
+      // First, check if category is being used
+      setIsCheckingUsage(true);
       try {
-        await deleteDoc(doc(firestore, 'categories', categoryId));
-        toast({ title: "Categoria Deletada", description: "A categoria foi removida." });
+        const periodsSnapshot = await getDocs(collection(firestore, `users/${userId}/periods`));
+        let count = 0;
+        
+        for (const periodDoc of periodsSnapshot.docs) {
+          const transactionsQuery = query(
+            collection(firestore, `users/${userId}/periods/${periodDoc.id}/transactions`),
+            where('categoryOrAppId', '==', categoryId),
+            where('type', '==', 'Expense')
+          );
+          const transactionsSnapshot = await getDocs(transactionsQuery);
+          count += transactionsSnapshot.size;
+        }
+        
+        setUsageCount(count);
+        const category = categories.find((c: Category) => c.id === categoryId);
+        setCategoryToDelete(category || null);
+      } catch (e) {
+        console.error('Error checking category usage:', e);
+        toast({ 
+          title: "Erro", 
+          description: "Não foi possível verificar o uso da categoria.", 
+          variant: "destructive" 
+        });
+      } finally {
+        setIsCheckingUsage(false);
+      }
+    };
+    
+    const confirmDeleteCategory = async () => {
+      if (!firestore || !categoryToDelete) return;
+      try {
+        console.log('Attempting to delete category:', categoryToDelete.id);
+        await deleteDoc(doc(firestore, 'categories', categoryToDelete.id));
+        console.log('Category deleted successfully');
+        
+        // Notify parent component to update state
+        if (onCategoryDeleted) {
+          onCategoryDeleted(categoryToDelete.id);
+        }
+        
+        toast({ 
+          title: "Categoria Deletada", 
+          description: `"${categoryToDelete.name}" foi removida com sucesso.` 
+        });
       } catch (e) {
         console.error("Error deleting category: ", e);
-        toast({ title: "Erro", description: "Não foi possível deletar a categoria.", variant: "destructive" });
+        toast({ 
+          title: "Erro", 
+          description: "Não foi possível deletar a categoria. Verifique as permissões do Firestore.", 
+          variant: "destructive" 
+        });
+      } finally {
+        setCategoryToDelete(null);
+        setUsageCount(0);
       }
     };
     
@@ -275,13 +408,65 @@ const Settings = ({ categories, rideApps, activePeriod, userId }: any) => {
     };
 
     const handleDeleteRideApp = async (appId: string) => {
-      if (!firestore) return;
+      if (!firestore || !userId) return;
+      
+      // First, check if ride app is being used
+      setIsCheckingUsage(true);
       try {
-        await deleteDoc(doc(firestore, 'rideApps', appId));
-        toast({ title: "App de Corrida Deletado", description: "O app de corrida foi removido." });
+        const periodsSnapshot = await getDocs(collection(firestore, `users/${userId}/periods`));
+        let count = 0;
+        
+        for (const periodDoc of periodsSnapshot.docs) {
+          const transactionsQuery = query(
+            collection(firestore, `users/${userId}/periods/${periodDoc.id}/transactions`),
+            where('categoryOrAppId', '==', appId),
+            where('type', '==', 'Revenue')
+          );
+          const transactionsSnapshot = await getDocs(transactionsQuery);
+          count += transactionsSnapshot.size;
+        }
+        
+        setUsageCount(count);
+        const app = rideApps.find((a: RideApp) => a.id === appId);
+        setRideAppToDelete(app || null);
       } catch (e) {
-        console.error("Error deleting ride app: ", e);
-        toast({ title: "Erro", description: "Não foi possível deletar o app de corrida.", variant: "destructive" });
+        console.error('Error checking ride app usage:', e);
+        toast({ 
+          title: "Erro", 
+          description: "Não foi possível verificar o uso do app de corrida.", 
+          variant: "destructive" 
+        });
+      } finally {
+        setIsCheckingUsage(false);
+      }
+    };
+
+    const confirmDeleteRideApp = async () => {
+      if (!firestore || !rideAppToDelete) return;
+      
+      try {
+        const docRef = doc(firestore, 'rideApps', rideAppToDelete.id);
+        await deleteDoc(docRef);
+        
+        // Notify parent component to update state
+        if (onRideAppDeleted) {
+          onRideAppDeleted(rideAppToDelete.id);
+        }
+        
+        toast({ 
+          title: "App de Corrida Deletado", 
+          description: `"${rideAppToDelete.name}" foi removido com sucesso.` 
+        });
+      } catch (e: any) {
+        console.error("Error deleting ride app:", e);
+        toast({ 
+          title: "Erro", 
+          description: `Não foi possível deletar: ${e.code || e.message}`, 
+          variant: "destructive" 
+        });
+      } finally {
+        setRideAppToDelete(null);
+        setUsageCount(0);
       }
     };
 
@@ -341,6 +526,43 @@ const Settings = ({ categories, rideApps, activePeriod, userId }: any) => {
     
     return (
         <div className="space-y-8">
+            {/* Theme Selector Card */}
+            <Card>
+                <CardHeader>
+                    <CardTitle>Aparência</CardTitle>
+                    <CardDescription>Personalize a aparência da aplicação</CardDescription>
+                </CardHeader>
+                <CardContent>
+                    <div className="flex items-center justify-between p-4 border rounded-lg">
+                        <div className="flex items-center gap-3">
+                            {theme === 'dark' ? (
+                                <div className="p-2 rounded-full bg-primary/20">
+                                    <Moon className="h-5 w-5 text-primary" />
+                                </div>
+                            ) : (
+                                <div className="p-2 rounded-full bg-yellow-500/20">
+                                    <Sun className="h-5 w-5 text-yellow-600" />
+                                </div>
+                            )}
+                            <div>
+                                <p className="font-medium">Tema {theme === 'dark' ? 'Escuro' : 'Claro'}</p>
+                                <p className="text-sm text-muted-foreground">
+                                    {theme === 'dark' ? 'Reduz o brilho da tela' : 'Interface com mais luz'}
+                                </p>
+                            </div>
+                        </div>
+                        <div className="flex items-center gap-3">
+                            <Sun className="h-4 w-4 text-muted-foreground" />
+                            <Switch
+                                checked={theme === 'dark'}
+                                onCheckedChange={(checked) => onThemeChange(checked ? 'dark' : 'light')}
+                            />
+                            <Moon className="h-4 w-4 text-muted-foreground" />
+                        </div>
+                    </div>
+                </CardContent>
+            </Card>
+
             <Card>
                 <CardHeader>
                     <CardTitle>Configuração Período</CardTitle>
@@ -382,10 +604,25 @@ const Settings = ({ categories, rideApps, activePeriod, userId }: any) => {
                     <Button onClick={handleAddCategory}>Add</Button>
                   </div>
                   <ul className="space-y-2 border-t">
-                    {categories && categories.map((cat: any) => (
-                      <li key={cat.id} className="flex justify-between items-center border-b p-2">
-                        <span>{cat.name}</span>
-                        <Button variant="ghost" size="icon" onClick={() => handleDeleteCategory(cat.id)}><Trash2 className="h-4 w-4"/></Button>
+                    {categories && categories.map((cat: Category) => (
+                      <li key={cat.id} className="flex justify-between items-center border-b p-2 hover:bg-accent/50 transition-colors rounded-md group">
+                        <div className="flex items-center gap-2">
+                          <span className="font-medium">{cat.name}</span>
+                          {categoryUsageCounts[cat.id] > 0 && (
+                            <span className="text-xs bg-primary/20 text-primary px-2 py-0.5 rounded-full">
+                              {categoryUsageCounts[cat.id]} uso{categoryUsageCounts[cat.id] !== 1 ? 's' : ''}
+                            </span>
+                          )}
+                        </div>
+                        <Button 
+                          variant="ghost" 
+                          size="icon" 
+                          onClick={() => handleDeleteCategory(cat.id)}
+                          disabled={isCheckingUsage}
+                          className="opacity-0 group-hover:opacity-100 transition-opacity hover:bg-destructive hover:text-destructive-foreground"
+                        >
+                          <Trash2 className="h-5 w-5"/>
+                        </Button>
                       </li>
                     ))}
                   </ul>
@@ -402,16 +639,93 @@ const Settings = ({ categories, rideApps, activePeriod, userId }: any) => {
                     <Button onClick={handleAddRideApp}>Add</Button>
                   </div>
                   <ul className="space-y-2 border-t">
-                    {rideApps && rideApps.map((app: any) => (
-                      <li key={app.id} className="flex justify-between items-center border-b p-2">
-                        <span>{app.name}</span>
-                         <Button variant="ghost" size="icon" onClick={() => handleDeleteRideApp(app.id)}><Trash2 className="h-4 w-4"/></Button>
+                    {rideApps && rideApps.map((app: RideApp) => (
+                      <li key={app.id} className="flex justify-between items-center border-b p-2 hover:bg-accent/50 transition-colors rounded-md group">
+                        <div className="flex items-center gap-2">
+                          <span className="font-medium">{app.name}</span>
+                          {rideAppUsageCounts[app.id] > 0 && (
+                            <span className="text-xs bg-primary/20 text-primary px-2 py-0.5 rounded-full">
+                              {rideAppUsageCounts[app.id]} uso{rideAppUsageCounts[app.id] !== 1 ? 's' : ''}
+                            </span>
+                          )}
+                        </div>
+                         <Button 
+                           variant="ghost" 
+                           size="icon" 
+                           onClick={() => handleDeleteRideApp(app.id)}
+                           disabled={isCheckingUsage}
+                           className="opacity-0 group-hover:opacity-100 transition-opacity hover:bg-destructive hover:text-destructive-foreground"
+                         >
+                           <Trash2 className="h-5 w-5"/>
+                         </Button>
                       </li>
                     ))}
                   </ul>
                 </CardContent>
               </Card>
             </div>
+
+            {/* Confirmation Dialog for Category Deletion */}
+            <AlertDialog open={!!categoryToDelete} onOpenChange={() => setCategoryToDelete(null)}>
+                <AlertDialogContent>
+                    <AlertDialogHeader>
+                        <AlertDialogTitle>Deletar Categoria?</AlertDialogTitle>
+                        <AlertDialogDescription>
+                            {usageCount > 0 ? (
+                                <>
+                                    <span className="text-yellow-500 font-semibold">Atenção:</span> A categoria "{categoryToDelete?.name}" está sendo usada em <span className="font-bold">{usageCount}</span> transação{usageCount !== 1 ? 'ões' : ''}.
+                                    <br /><br />
+                                    Ao deletar esta categoria, as transações associadas exibirão "Desconhecido" como categoria.
+                                    <br /><br />
+                                    Tem certeza que deseja continuar?
+                                </>
+                            ) : (
+                                `Tem certeza que deseja deletar a categoria "${categoryToDelete?.name}"? Esta ação não pode ser desfeita.`
+                            )}
+                        </AlertDialogDescription>
+                    </AlertDialogHeader>
+                    <AlertDialogFooter>
+                        <AlertDialogCancel>Cancelar</AlertDialogCancel>
+                        <AlertDialogAction 
+                            onClick={confirmDeleteCategory} 
+                            className="bg-destructive hover:bg-destructive/90"
+                        >
+                            Deletar
+                        </AlertDialogAction>
+                    </AlertDialogFooter>
+                </AlertDialogContent>
+            </AlertDialog>
+
+            {/* Confirmation Dialog for RideApp Deletion */}
+            <AlertDialog open={!!rideAppToDelete} onOpenChange={() => setRideAppToDelete(null)}>
+                <AlertDialogContent>
+                    <AlertDialogHeader>
+                        <AlertDialogTitle>Deletar App de Corrida?</AlertDialogTitle>
+                        <AlertDialogDescription>
+                            {usageCount > 0 ? (
+                                <>
+                                    <span className="text-yellow-500 font-semibold">Atenção:</span> O app "{rideAppToDelete?.name}" está sendo usado em <span className="font-bold">{usageCount}</span> transação{usageCount !== 1 ? 'ões' : ''}.
+                                    <br /><br />
+                                    Ao deletar este app, as transações associadas exibirão "Desconhecido" como app.
+                                    <br /><br />
+                                    Tem certeza que deseja continuar?
+                                </>
+                            ) : (
+                                `Tem certeza que deseja deletar o app "${rideAppToDelete?.name}"? Esta ação não pode ser desfeita.`
+                            )}
+                        </AlertDialogDescription>
+                    </AlertDialogHeader>
+                    <AlertDialogFooter>
+                        <AlertDialogCancel>Cancelar</AlertDialogCancel>
+                        <AlertDialogAction 
+                            onClick={confirmDeleteRideApp} 
+                            className="bg-destructive hover:bg-destructive/90"
+                        >
+                            Deletar
+                        </AlertDialogAction>
+                    </AlertDialogFooter>
+                </AlertDialogContent>
+            </AlertDialog>
         </div>
     );
 };
@@ -557,21 +871,32 @@ const History = ({ allPeriods, userId, categories, rideApps, onEditTransaction }
                     <div className="space-y-2">
                         {transactions && transactions.map(t => {
                             const detailName = t.type === 'Revenue'
-                                ? rideApps.find((app: any) => app.id === t.categoryOrAppId)?.name
-                                : categories.find((cat: any) => cat.id === t.categoryOrAppId)?.name;
+                                ? rideApps.find((app: RideApp) => app.id === t.categoryOrAppId)?.name
+                                : categories.find((cat: Category) => cat.id === t.categoryOrAppId)?.name;
                             
                             const fullDescription = t.type === 'Expense' 
-                                ? `${detailName || 'Categoria'} - ${t.description}` 
-                                : detailName || 'Receita';
+                                ? `${detailName || 'Desconhecido'} - ${t.description}` 
+                                : detailName || 'Desconhecido';
 
                             return (
-                                <div key={t.id} className="flex justify-between items-center p-3 bg-card-foreground/5 rounded-lg">
+                                <div key={t.id} className="flex justify-between items-center p-4 bg-card border rounded-lg hover:shadow-md transition-all">
                                     <div className="flex-1">
-                                        <p className={`font-bold ${t.type === 'Revenue' ? 'text-green-400' : 'text-red-400'}`}>
-                                            {t.type === 'Revenue' ? `+ ${formatCurrency(t.amount)}` : `- ${formatCurrency(t.amount)}`}
-                                        </p>
-                                        <p className="text-sm text-muted-foreground">{fullDescription}</p>
-                                        <p className="text-xs text-muted-foreground">{t.timestamp?.toDate().toLocaleString()}</p>
+                                        <div className="flex items-center gap-2 mb-1">
+                                            {t.type === 'Revenue' ? (
+                                                <div className="p-1 rounded-full bg-green-500/20">
+                                                    <PlusCircle className="h-4 w-4 text-green-400" />
+                                                </div>
+                                            ) : (
+                                                <div className="p-1 rounded-full bg-red-500/20">
+                                                    <MinusCircle className="h-4 w-4 text-red-400" />
+                                                </div>
+                                            )}
+                                            <p className={`font-bold text-lg ${t.type === 'Revenue' ? 'text-green-400' : 'text-red-400'}`}>
+                                                {t.type === 'Revenue' ? `+ ${formatCurrency(t.amount)}` : `- ${formatCurrency(t.amount)}`}
+                                            </p>
+                                        </div>
+                                        <p className="text-sm text-foreground ml-8">{fullDescription}</p>
+                                        <p className="text-xs text-muted-foreground ml-8">{t.timestamp?.toDate().toLocaleDateString('pt-BR')} às {t.timestamp?.toDate().toLocaleTimeString('pt-BR', { hour: '2-digit', minute: '2-digit' })}</p>
                                     </div>
                                     <DropdownMenu>
                                         <DropdownMenuTrigger asChild>
@@ -580,11 +905,11 @@ const History = ({ allPeriods, userId, categories, rideApps, onEditTransaction }
                                         <DropdownMenuContent align="end">
                                             <DropdownMenuItem onClick={() => onEditTransaction(t)}>
                                                 <Edit className="mr-2 h-4 w-4" />
-                                                <span>Edit</span>
+                                                <span>Editar</span>
                                             </DropdownMenuItem>
-                                            <DropdownMenuItem onClick={() => setTransactionToDelete(t)} className="text-red-500 focus:text-red-500">
+                                            <DropdownMenuItem onClick={() => setTransactionToDelete(t)} className="text-destructive focus:text-destructive">
                                                 <Trash2 className="mr-2 h-4 w-4" />
-                                                <span>Delete</span>
+                                                <span>Deletar</span>
                                             </DropdownMenuItem>
                                         </DropdownMenuContent>
                                     </DropdownMenu>
@@ -598,14 +923,14 @@ const History = ({ allPeriods, userId, categories, rideApps, onEditTransaction }
             <AlertDialog open={!!transactionToDelete} onOpenChange={() => setTransactionToDelete(null)}>
                 <AlertDialogContent>
                     <AlertDialogHeader>
-                        <AlertDialogTitle>Are you sure?</AlertDialogTitle>
+                        <AlertDialogTitle>Deletar Transação?</AlertDialogTitle>
                         <AlertDialogDescription>
                             Essa ação não pode ser desfeita. Isso irá apagar definitivamente a transação.
                         </AlertDialogDescription>
                     </AlertDialogHeader>
                     <AlertDialogFooter>
-                        <AlertDialogCancel>Cancel</AlertDialogCancel>
-                        <AlertDialogAction onClick={handleDeleteTransaction} className="bg-red-500 hover:bg-red-600">Delete</AlertDialogAction>
+                        <AlertDialogCancel>Cancelar</AlertDialogCancel>
+                        <AlertDialogAction onClick={handleDeleteTransaction} className="bg-destructive hover:bg-destructive/90">Deletar</AlertDialogAction>
                     </AlertDialogFooter>
                 </AlertDialogContent>
             </AlertDialog>
@@ -681,8 +1006,23 @@ const LoginScreen = () => {
         await signInWithEmailAndPassword(auth, email, password);
       }
     } catch (e: any) {
-      setError(e.message);
       console.error("Authentication error:", e);
+      // Provide user-friendly error messages
+      if (e.code === 'auth/invalid-credential') {
+        setError("Email ou senha incorretos. Verifique suas credenciais.");
+      } else if (e.code === 'auth/user-not-found') {
+        setError("Usuário não encontrado. Cadastre-se primeiro.");
+      } else if (e.code === 'auth/wrong-password') {
+        setError("Senha incorreta. Tente novamente.");
+      } else if (e.code === 'auth/email-already-in-use') {
+        setError("Este email já está em uso. Faça login ou use outro email.");
+      } else if (e.code === 'auth/weak-password') {
+        setError("Senha muito fraca. Use pelo menos 6 caracteres.");
+      } else if (e.code === 'auth/invalid-email') {
+        setError("Email inválido. Verifique o formato.");
+      } else {
+        setError("Erro ao autenticar. Tente novamente.");
+      }
     }
   };
   
@@ -793,6 +1133,7 @@ const LoginScreen = () => {
 export default function IDriveApp() {
   const { firestore, auth } = useFirebase();
   const { user, isUserLoading } = useUser();
+  const { theme, setTheme } = useTheme();
   const [view, setView] = useState('Home');
   
   const [categories, setCategories] = useState<any[]>([]);
@@ -830,19 +1171,46 @@ export default function IDriveApp() {
     }
   };
   
+  const handleThemeChange = (newTheme: Theme) => {
+    setTheme(newTheme);
+  };
+  
   // Fetch settings (Categories and RideApps)
   useEffect(() => {
     if (!firestore) return;
-    const catUnsub = onSnapshot(query(collection(firestore, 'categories'), orderBy('name')), (snapshot) => {
+    
+    const catUnsub = onSnapshot(
+      collection(firestore, 'categories'),
+      (snapshot) => {
         const catData: any[] = [];
-        snapshot.forEach(doc => catData.push({ id: doc.id, ...doc.data() }));
+        snapshot.forEach(doc => {
+          const { id: _, ...data } = doc.data();
+          catData.push({ id: doc.id, ...data });
+        });
+        catData.sort((a, b) => a.name.localeCompare(b.name));
         setCategories(catData);
-    });
-    const appUnsub = onSnapshot(query(collection(firestore, 'rideApps'), orderBy('name')), (snapshot) => {
+      },
+      (error) => {
+        console.error('Error fetching categories:', error);
+      }
+    );
+    
+    const appUnsub = onSnapshot(
+      collection(firestore, 'rideApps'),
+      (snapshot) => {
         const appData: any[] = [];
-        snapshot.forEach(doc => appData.push({ id: doc.id, ...doc.data() }));
+        snapshot.forEach(doc => {
+          const { id: _, ...data } = doc.data();
+          appData.push({ id: doc.id, ...data });
+        });
+        appData.sort((a, b) => a.name.localeCompare(b.name));
         setRideApps(appData);
-    });
+      },
+      (error) => {
+        console.error('Error fetching ride apps:', error);
+      }
+    );
+    
     return () => {
       catUnsub();
       appUnsub();
@@ -913,7 +1281,16 @@ export default function IDriveApp() {
             onOpenExpense={() => handleOpenNewTransaction('Expense')}
         />;
       case 'Settings':
-        return <Settings categories={categories} rideApps={rideApps} activePeriod={activePeriod} userId={user.uid} />;
+        return <Settings 
+          categories={categories} 
+          rideApps={rideApps} 
+          activePeriod={activePeriod} 
+          userId={user.uid}
+          onCategoryDeleted={(id: string) => setCategories(prev => prev.filter(cat => cat.id !== id))}
+          onRideAppDeleted={(id: string) => setRideApps(prev => prev.filter(app => app.id !== id))}
+          theme={theme}
+          onThemeChange={handleThemeChange}
+        />;
       case 'History':
         return <History 
             allPeriods={allPeriods} 
@@ -928,14 +1305,31 @@ export default function IDriveApp() {
   };
 
   return (
-    <div className="min-h-screen bg-background text-foreground dark">
+    <div className="min-h-screen bg-background text-foreground">
       <div className="container mx-auto p-4 max-w-4xl">
         <header className="flex justify-between items-center py-4 mb-6">
           <div className="flex items-center gap-2">
             <DriveWiseIcon className="text-primary h-8 w-8" />
             <h1 className="text-2xl font-bold">DriveWise</h1>
           </div>
-          <DropdownMenu>
+          <div className="flex items-center gap-2">
+            {/* Theme Toggle Button */}
+            <Button
+              variant="ghost"
+              size="icon"
+              onClick={() => handleThemeChange(theme === 'dark' ? 'light' : 'dark')}
+              className="rounded-full"
+              title={theme === 'dark' ? 'Mudar para tema claro' : 'Mudar para tema escuro'}
+            >
+              {theme === 'dark' ? (
+                <Sun className="h-5 w-5" />
+              ) : (
+                <Moon className="h-5 w-5" />
+              )}
+            </Button>
+            
+            {/* User Menu */}
+            <DropdownMenu>
             <DropdownMenuTrigger asChild>
                 <Button variant="ghost" className="relative h-10 w-10 rounded-full">
                     <Avatar className="h-10 w-10">
@@ -960,6 +1354,7 @@ export default function IDriveApp() {
                 </DropdownMenuItem>
             </DropdownMenuContent>
         </DropdownMenu>
+          </div>
         </header>
         {renderView()}
         <nav className="fixed bottom-0 left-0 right-0 bg-card border-t border-border flex justify-around p-2">
