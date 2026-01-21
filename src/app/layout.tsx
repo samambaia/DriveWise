@@ -8,6 +8,10 @@ export const metadata: Metadata = {
   title: 'DriveWise - Controle Financeiro para Motoristas de App',
   description: 'Seu controle pessoal de finanças para Motoristas de App.',
   manifest: '/manifest.json',
+  icons: {
+    icon: '/icon.png',
+    apple: '/apple-icon.png',
+  },
 };
 
 export default function RootLayout({
@@ -22,6 +26,7 @@ export default function RootLayout({
         <link rel="preconnect" href="https://fonts.gstatic.com" crossOrigin="anonymous" />
         <link href="https://fonts.googleapis.com/css2?family=Inter:wght@300;400;500;600;700;800&display=swap" rel="stylesheet" />
         <link rel="manifest" href="/manifest.json" />
+        <link rel="icon" href="/icon.png" type="image/png" />
       </head>
       <body className="font-body antialiased">
         <ThemeProvider>
