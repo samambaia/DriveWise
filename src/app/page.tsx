@@ -146,67 +146,81 @@ const Dashboard = ({ transactions, activePeriod, onOpenRevenue, onOpenExpense }:
       
   return (
     <div className="space-y-6">
-      <Card className="bg-gradient-to-br from-card to-card/50 border-2">
+      <Card className="gradient-primary text-primary-foreground rounded-2xl elevation-3 overflow-hidden">
         <CardHeader>
-          <CardTitle>Dashboard</CardTitle>
-          <CardDescription>Seu resumo financeiro para o período.</CardDescription>
+          <CardTitle className="text-2xl">Dashboard</CardTitle>
+          <CardDescription className="text-primary-foreground/80">Seu resumo financeiro para o período</CardDescription>
         </CardHeader>
-        <CardContent className="text-center">
-            <h2 className="text-sm text-muted-foreground mb-2">Saldo Atual</h2>
-            <p className={`text-5xl font-bold mb-2 ${currentBalance >= 0 ? 'text-primary' : 'text-destructive'}`}>
+        <CardContent className="text-center pb-8">
+            <h2 className="text-sm text-primary-foreground/80 mb-4">Saldo Atual</h2>
+            <p className="text-6xl font-bold mb-2">
                 {formatCurrency(currentBalance)}
             </p>
         </CardContent>
       </Card>
       
       {activePeriod && (
-        <Card className="border-l-4 border-l-primary">
-          <CardHeader>
-              <CardTitle>Progresso da Meta</CardTitle>
+        <Card className="rounded-2xl elevation-2 bg-gradient-to-br from-card to-primary-container/30">
+          <CardHeader className="flex flex-row items-center justify-between">
+              <div>
+                  <CardTitle className="text-xl">Progresso da Meta</CardTitle>
+                  <CardDescription>Seu progresso até o objetivo</CardDescription>
+              </div>
+              <div className="h-16 w-16 relative">
+                  <svg className="h-16 w-16 transform -rotate-90">
+                      <circle cx="32" cy="32" r="28" fill="none" stroke="currentColor" strokeWidth="4" className="text-muted" />
+                      <circle cx="32" cy="32" r="28" fill="none" stroke="currentColor" strokeWidth="4" 
+                              strokeDasharray={175.93} 
+                              strokeDashoffset={175.93 - (175.93 * Math.max(0, Math.min(100, progress)) / 100)} 
+                              className="text-primary transition-all duration-1000 ease-out" />
+                  </svg>
+                  <span className="absolute inset-0 flex items-center justify-center text-sm font-bold">
+                      {Math.round(progress)}%
+                  </span>
+              </div>
           </CardHeader>
           <CardContent>
-            <Progress value={Math.max(0, Math.min(100, progress))} className="w-full h-3" />
-            <div className="flex justify-between text-sm mt-3 text-muted-foreground">
+            <Progress value={Math.max(0, Math.min(100, progress))} className="w-full h-2" />
+            <div className="flex justify-between text-sm mt-4 text-muted-foreground">
               <span className="font-medium">{formatCurrency(initialBalance)}</span>
-              <span className="font-bold text-primary text-base">{Math.round(progress)}%</span>
               <span className="font-medium">{formatCurrency(targetBalance)}</span>
             </div>
           </CardContent>
         </Card>
       )}
 
-      <div className="grid grid-cols-1 md:grid-cols-2 gap-4">
-        <Button onClick={onOpenRevenue} className="p-6 text-lg bg-green-600 hover:bg-green-700">
-          <PlusCircle className="mr-2 h-5 w-5"/> Receita (Corridas)
+      <div className="grid grid-cols-2 gap-4">
+        <Button onClick={onOpenRevenue} className="p-6 text-lg gradient-success elevation-2 rounded-2xl hover:elevation-3 transition-all">
+          <PlusCircle className="mr-2 h-5 w-5"/> Receita
         </Button>
-        <Button onClick={onOpenExpense} variant="destructive" className="p-6 text-lg">
+        <Button onClick={onOpenExpense} className="p-6 text-lg gradient-error elevation-2 rounded-2xl hover:elevation-3 transition-all">
           <MinusCircle className="mr-2 h-5 w-5"/> Despesa
         </Button>
       </div>
 
       <div className="grid grid-cols-1 md:grid-cols-3 gap-4">
-        <Card className="border-l-4 border-l-primary">
-          <CardHeader>
-            <CardTitle className="text-lg">Total Corridas</CardTitle>
+        <Card className="rounded-2xl elevation-1 bg-gradient-to-br from-card to-primary-container/20 hover:elevation-2 transition-all">
+          <CardHeader className="pb-2">
+            <CardTitle className="text-base font-medium text-muted-foreground">Total Corridas</CardTitle>
           </CardHeader>
           <CardContent>
-            <p className="text-3xl font-bold text-primary">{totalTrips}</p>
+            <p className="text-4xl font-bold text-primary">{totalTrips}</p>
           </CardContent>
         </Card>
-        <Card className="border-l-4 border-l-green-500">
-          <CardHeader>
-            <CardTitle className="text-lg">Total Receitas</CardTitle>
+        <Card className="rounded-2xl elevation-1 bg-gradient-to-br from-card to-success/20 hover:elevation-2 transition-all">
+          <CardHeader className="pb-2">
+            <CardTitle className="text-base font-medium text-muted-foreground">Total Receitas</CardTitle>
           </CardHeader>
           <CardContent>
-            <p className="text-3xl font-bold text-green-400">{formatCurrency(totalRevenue)}</p>
+            <p className="text-4xl font-bold text-success">{formatCurrency(totalRevenue)}</p>
           </CardContent>
         </Card>
-        <Card className="border-l-4 border-l-red-500">
-          <CardHeader>
-            <CardTitle className="text-lg">Total Despesas</CardTitle>
+        <Card className="rounded-2xl elevation-1 bg-gradient-to-br from-card to-error/20 hover:elevation-2 transition-all">
+          <CardHeader className="pb-2">
+            <CardTitle className="text-base font-medium text-muted-foreground">Total Despesas</CardTitle>
           </CardHeader>
           <CardContent>
-            <p className="text-3xl font-bold text-red-400">{formatCurrency(totalExpenses)}</p>
+            <p className="text-4xl font-bold text-error">{formatCurrency(totalExpenses)}</p>
           </CardContent>
         </Card>
       </div>
@@ -525,91 +539,91 @@ const Settings = ({ categories, rideApps, activePeriod, userId, onCategoryDelete
     };
     
     return (
-        <div className="space-y-8">
-            {/* Theme Selector Card */}
-            <Card>
+        <div className="space-y-6">
+            <Card className="rounded-2xl elevation-1">
                 <CardHeader>
                     <CardTitle>Aparência</CardTitle>
                     <CardDescription>Personalize a aparência da aplicação</CardDescription>
                 </CardHeader>
                 <CardContent>
-                    <div className="flex items-center justify-between p-4 border rounded-lg">
-                        <div className="flex items-center gap-3">
+                    <div className="flex items-center justify-between p-4 bg-accent rounded-xl">
+                        <div className="flex items-center gap-4">
                             {theme === 'dark' ? (
-                                <div className="p-2 rounded-full bg-primary/20">
-                                    <Moon className="h-5 w-5 text-primary" />
+                                <div className="p-3 rounded-full bg-primary/20">
+                                    <Moon className="h-6 w-6 text-primary" />
                                 </div>
                             ) : (
-                                <div className="p-2 rounded-full bg-yellow-500/20">
-                                    <Sun className="h-5 w-5 text-yellow-600" />
+                                <div className="p-3 rounded-full bg-tertiary/20">
+                                    <Sun className="h-6 w-6 text-tertiary" />
                                 </div>
                             )}
                             <div>
-                                <p className="font-medium">Tema {theme === 'dark' ? 'Escuro' : 'Claro'}</p>
+                                <p className="font-medium text-lg">Tema {theme === 'dark' ? 'Escuro' : 'Claro'}</p>
                                 <p className="text-sm text-muted-foreground">
                                     {theme === 'dark' ? 'Reduz o brilho da tela' : 'Interface com mais luz'}
                                 </p>
                             </div>
                         </div>
-                        <div className="flex items-center gap-3">
-                            <Sun className="h-4 w-4 text-muted-foreground" />
+                        <div className="flex items-center gap-4">
+                            <Sun className="h-5 w-5 text-muted-foreground" />
                             <Switch
                                 checked={theme === 'dark'}
                                 onCheckedChange={(checked) => onThemeChange(checked ? 'dark' : 'light')}
+                                className="scale-110"
                             />
-                            <Moon className="h-4 w-4 text-muted-foreground" />
+                            <Moon className="h-5 w-5 text-muted-foreground" />
                         </div>
                     </div>
                 </CardContent>
             </Card>
 
-            <Card>
+            <Card className="rounded-2xl elevation-2">
                 <CardHeader>
                     <CardTitle>Configuração Período</CardTitle>
                     <CardDescription>{activePeriod ? 'Edite o período atual ou comece um novo.' : 'Defina um novo período para iniciar o rastreamento.'}</CardDescription>
                 </CardHeader>
-                <CardContent className="space-y-4">
+                <CardContent className="space-y-5">
                     <div className="space-y-2">
-                      <Label htmlFor="startDate">Período:</Label>
+                      <Label htmlFor="startDate" className="text-base font-medium">Período</Label>
                       <div className="grid grid-cols-2 gap-4">
-                        <Input id="startDate" type="date" value={startDate} onChange={(e) => setStartDate(e.target.value)} placeholder="Start Date" />
-                        <Input type="date" value={endDate} onChange={(e) => setEndDate(e.target.value)} placeholder="End Date" />
+                        <Input id="startDate" type="date" value={startDate} onChange={(e) => setStartDate(e.target.value)} className="rounded-xl" />
+                        <Input type="date" value={endDate} onChange={(e) => setEndDate(e.target.value)} className="rounded-xl" />
                       </div>
                     </div>
                     <div className="grid grid-cols-2 gap-4">
                       <div className="space-y-2">
-                        <Label htmlFor="initialBalance">Saldo Inicial</Label>
-                        <CurrencyInput id="initialBalance" value={initialBalance || 0} onValueChange={(value) => setInitialBalance(value)} placeholder="Saldo Inicial" />
+                        <Label htmlFor="initialBalance" className="text-base font-medium">Saldo Inicial</Label>
+                        <CurrencyInput id="initialBalance" value={initialBalance || 0} onValueChange={(value) => setInitialBalance(value)} className="rounded-xl" />
                       </div>
                       <div className="space-y-2">
-                        <Label htmlFor="targetBalance">Objetivo do Período</Label>
-                        <CurrencyInput id="targetBalance" value={targetBalance || 0} onValueChange={(value) => setTargetBalance(value)} placeholder="Objetivo Período" />
+                        <Label htmlFor="targetBalance" className="text-base font-medium">Objetivo do Período</Label>
+                        <CurrencyInput id="targetBalance" value={targetBalance || 0} onValueChange={(value) => setTargetBalance(value)} className="rounded-xl" />
                       </div>
                     </div>
-                    <Button onClick={handleActivateNewPeriod} disabled={isSavingPeriod}>
+                    <Button onClick={handleActivateNewPeriod} disabled={isSavingPeriod} className="w-full rounded-xl py-6 gradient-primary elevation-2 hover:elevation-3 transition-all text-base">
                         {isSavingPeriod ? 'Salvando...' : (activePeriod ? 'Ativar Novo Período' : 'Ativar Período')}
                     </Button>
-                    <p className="text-xs text-muted-foreground">Nota: Ativar um novo período vai arquivar o atual.</p>
+                    <p className="text-xs text-muted-foreground text-center">Nota: Ativar um novo período vai arquivar o atual.</p>
                 </CardContent>
             </Card>
 
-            <div className="grid grid-cols-1 md:grid-cols-2 gap-8">
-              <Card>
+            <div className="grid grid-cols-1 md:grid-cols-2 gap-6">
+              <Card className="rounded-2xl elevation-1">
                 <CardHeader>
                   <CardTitle>Categorias de Despesa</CardTitle>
                 </CardHeader>
                 <CardContent>
-                  <div className="flex gap-2 mb-4">
-                    <Input value={newCategory} onChange={e => setNewCategory(e.target.value)} placeholder="Nova Categoria" />
-                    <Button onClick={handleAddCategory}>Add</Button>
+                  <div className="flex gap-3 mb-6">
+                    <Input value={newCategory} onChange={e => setNewCategory(e.target.value)} placeholder="Nova Categoria" className="rounded-xl" />
+                    <Button onClick={handleAddCategory} className="rounded-xl px-6">Add</Button>
                   </div>
-                  <ul className="space-y-2 border-t">
+                  <ul className="space-y-3">
                     {categories && categories.map((cat: Category) => (
-                      <li key={cat.id} className="flex justify-between items-center border-b p-2 hover:bg-accent/50 transition-colors rounded-md group">
-                        <div className="flex items-center gap-2">
+                      <li key={cat.id} className="flex justify-between items-center p-3 bg-accent/50 rounded-xl group hover:bg-accent transition-all">
+                        <div className="flex items-center gap-3">
                           <span className="font-medium">{cat.name}</span>
                           {categoryUsageCounts[cat.id] > 0 && (
-                            <span className="text-xs bg-primary/20 text-primary px-2 py-0.5 rounded-full">
+                            <span className="text-xs bg-primary/20 text-primary px-2.5 py-1 rounded-full">
                               {categoryUsageCounts[cat.id]} uso{categoryUsageCounts[cat.id] !== 1 ? 's' : ''}
                             </span>
                           )}
@@ -619,7 +633,7 @@ const Settings = ({ categories, rideApps, activePeriod, userId, onCategoryDelete
                           size="icon" 
                           onClick={() => handleDeleteCategory(cat.id)}
                           disabled={isCheckingUsage}
-                          className="opacity-0 group-hover:opacity-100 transition-opacity hover:bg-destructive hover:text-destructive-foreground"
+                          className="opacity-0 group-hover:opacity-100 transition-all hover:bg-error hover:text-error-foreground rounded-lg"
                         >
                           <Trash2 className="h-5 w-5"/>
                         </Button>
@@ -629,22 +643,22 @@ const Settings = ({ categories, rideApps, activePeriod, userId, onCategoryDelete
                 </CardContent>
               </Card>
 
-              <Card>
+              <Card className="rounded-2xl elevation-1">
                 <CardHeader>
                   <CardTitle>Apps de Corrida</CardTitle>
                 </CardHeader>
                 <CardContent>
-                  <div className="flex gap-2 mb-4">
-                    <Input value={newRideApp} onChange={e => setNewRideApp(e.target.value)} placeholder="Novo App de Corrida" />
-                    <Button onClick={handleAddRideApp}>Add</Button>
+                  <div className="flex gap-3 mb-6">
+                    <Input value={newRideApp} onChange={e => setNewRideApp(e.target.value)} placeholder="Novo App de Corrida" className="rounded-xl" />
+                    <Button onClick={handleAddRideApp} className="rounded-xl px-6">Add</Button>
                   </div>
-                  <ul className="space-y-2 border-t">
+                  <ul className="space-y-3">
                     {rideApps && rideApps.map((app: RideApp) => (
-                      <li key={app.id} className="flex justify-between items-center border-b p-2 hover:bg-accent/50 transition-colors rounded-md group">
-                        <div className="flex items-center gap-2">
+                      <li key={app.id} className="flex justify-between items-center p-3 bg-accent/50 rounded-xl group hover:bg-accent transition-all">
+                        <div className="flex items-center gap-3">
                           <span className="font-medium">{app.name}</span>
                           {rideAppUsageCounts[app.id] > 0 && (
-                            <span className="text-xs bg-primary/20 text-primary px-2 py-0.5 rounded-full">
+                            <span className="text-xs bg-secondary/20 text-secondary px-2.5 py-1 rounded-full">
                               {rideAppUsageCounts[app.id]} uso{rideAppUsageCounts[app.id] !== 1 ? 's' : ''}
                             </span>
                           )}
@@ -654,7 +668,7 @@ const Settings = ({ categories, rideApps, activePeriod, userId, onCategoryDelete
                            size="icon" 
                            onClick={() => handleDeleteRideApp(app.id)}
                            disabled={isCheckingUsage}
-                           className="opacity-0 group-hover:opacity-100 transition-opacity hover:bg-destructive hover:text-destructive-foreground"
+                           className="opacity-0 group-hover:opacity-100 transition-all hover:bg-error hover:text-error-foreground rounded-lg"
                          >
                            <Trash2 className="h-5 w-5"/>
                          </Button>
@@ -667,13 +681,13 @@ const Settings = ({ categories, rideApps, activePeriod, userId, onCategoryDelete
 
             {/* Confirmation Dialog for Category Deletion */}
             <AlertDialog open={!!categoryToDelete} onOpenChange={() => setCategoryToDelete(null)}>
-                <AlertDialogContent>
+                <AlertDialogContent className="rounded-2xl">
                     <AlertDialogHeader>
                         <AlertDialogTitle>Deletar Categoria?</AlertDialogTitle>
                         <AlertDialogDescription>
                             {usageCount > 0 ? (
                                 <>
-                                    <span className="text-yellow-500 font-semibold">Atenção:</span> A categoria "{categoryToDelete?.name}" está sendo usada em <span className="font-bold">{usageCount}</span> transação{usageCount !== 1 ? 'ões' : ''}.
+                                    <span className="text-warning font-semibold">Atenção:</span> A categoria "{categoryToDelete?.name}" está sendo usada em <span className="font-bold">{usageCount}</span> transação{usageCount !== 1 ? 'ões' : ''}.
                                     <br /><br />
                                     Ao deletar esta categoria, as transações associadas exibirão "Desconhecido" como categoria.
                                     <br /><br />
@@ -685,10 +699,10 @@ const Settings = ({ categories, rideApps, activePeriod, userId, onCategoryDelete
                         </AlertDialogDescription>
                     </AlertDialogHeader>
                     <AlertDialogFooter>
-                        <AlertDialogCancel>Cancelar</AlertDialogCancel>
+                        <AlertDialogCancel className="rounded-xl">Cancelar</AlertDialogCancel>
                         <AlertDialogAction 
                             onClick={confirmDeleteCategory} 
-                            className="bg-destructive hover:bg-destructive/90"
+                            className="rounded-xl bg-error hover:bg-error/90"
                         >
                             Deletar
                         </AlertDialogAction>
@@ -698,13 +712,13 @@ const Settings = ({ categories, rideApps, activePeriod, userId, onCategoryDelete
 
             {/* Confirmation Dialog for RideApp Deletion */}
             <AlertDialog open={!!rideAppToDelete} onOpenChange={() => setRideAppToDelete(null)}>
-                <AlertDialogContent>
+                <AlertDialogContent className="rounded-2xl">
                     <AlertDialogHeader>
                         <AlertDialogTitle>Deletar App de Corrida?</AlertDialogTitle>
                         <AlertDialogDescription>
                             {usageCount > 0 ? (
                                 <>
-                                    <span className="text-yellow-500 font-semibold">Atenção:</span> O app "{rideAppToDelete?.name}" está sendo usado em <span className="font-bold">{usageCount}</span> transação{usageCount !== 1 ? 'ões' : ''}.
+                                    <span className="text-warning font-semibold">Atenção:</span> O app "{rideAppToDelete?.name}" está sendo usado em <span className="font-bold">{usageCount}</span> transação{usageCount !== 1 ? 'ões' : ''}.
                                     <br /><br />
                                     Ao deletar este app, as transações associadas exibirão "Desconhecido" como app.
                                     <br /><br />
@@ -716,10 +730,10 @@ const Settings = ({ categories, rideApps, activePeriod, userId, onCategoryDelete
                         </AlertDialogDescription>
                     </AlertDialogHeader>
                     <AlertDialogFooter>
-                        <AlertDialogCancel>Cancelar</AlertDialogCancel>
+                        <AlertDialogCancel className="rounded-xl">Cancelar</AlertDialogCancel>
                         <AlertDialogAction 
                             onClick={confirmDeleteRideApp} 
-                            className="bg-destructive hover:bg-destructive/90"
+                            className="rounded-xl bg-error hover:bg-error/90"
                         >
                             Deletar
                         </AlertDialogAction>
@@ -805,18 +819,19 @@ const History = ({ allPeriods, userId, categories, rideApps, onEditTransaction }
         };
     }, [transactions, categories, rideApps]);
     
-    const COLORS = ['#0088FE', '#00C49F', '#FFBB28', '#FF8042', '#8884d8'];
+    const COLORS = ['hsl(var(--chart-1))', 'hsl(var(--chart-2))', 'hsl(var(--chart-3))', 'hsl(var(--chart-4))', 'hsl(var(--chart-5))'];
 
 
     return (
         <div className="space-y-6">
-             <Card>
+             <Card className="rounded-2xl elevation-1">
                 <CardHeader>
                     <CardTitle>Análise & Histórico</CardTitle>
+                    <CardDescription>Visualize suas transações e métricas</CardDescription>
                 </CardHeader>
                 <CardContent>
                     <Select onValueChange={setSelectedPeriodId} value={selectedPeriodId}>
-                        <SelectTrigger>
+                        <SelectTrigger className="rounded-xl">
                             <SelectValue placeholder="Selecione um período" />
                         </SelectTrigger>
                         <SelectContent>
@@ -831,8 +846,8 @@ const History = ({ allPeriods, userId, categories, rideApps, onEditTransaction }
             </Card>
 
             <div className="grid grid-cols-1 lg:grid-cols-2 gap-6">
-                <Card>
-                    <CardHeader><CardTitle>Detalhamento Despesa</CardTitle></CardHeader>
+                <Card className="rounded-2xl elevation-1">
+                    <CardHeader><CardTitle className="text-lg">Detalhamento Despesa</CardTitle></CardHeader>
                     <CardContent>
                         {expenseData.length > 0 ? (
                             <ResponsiveContainer width="100%" height={300}>
@@ -845,11 +860,11 @@ const History = ({ allPeriods, userId, categories, rideApps, onEditTransaction }
                                     <Tooltip formatter={(value:any) => formatCurrency(value)} />
                                 </PieChart>
                             </ResponsiveContainer>
-                        ) : <p>Nenhuma despesa no período.</p>}
+                        ) : <p className="text-center text-muted-foreground py-8">Nenhuma despesa no período.</p>}
                     </CardContent>
                 </Card>
-                <Card>
-                    <CardHeader><CardTitle>Detalhamento Corridas</CardTitle></CardHeader>
+                <Card className="rounded-2xl elevation-1">
+                    <CardHeader><CardTitle className="text-lg">Detalhamento Corridas</CardTitle></CardHeader>
                     <CardContent>
                         {tripData.length > 0 ? (
                            <ResponsiveContainer width="100%" height={300}>
@@ -857,18 +872,18 @@ const History = ({ allPeriods, userId, categories, rideApps, onEditTransaction }
                                     <XAxis dataKey="name" />
                                     <YAxis />
                                     <Tooltip />
-                                    <Bar dataKey="value" fill="#82ca9d" name="Trips" />
+                                    <Bar dataKey="value" fill="hsl(var(--secondary))" name="Trips" radius={[4, 4, 0, 0]} />
                                 </BarChart>
                             </ResponsiveContainer>
-                        ) : <p>Nenhuma corrida no período.</p>}
+                        ) : <p className="text-center text-muted-foreground py-8">Nenhuma corrida no período.</p>}
                     </CardContent>
                 </Card>
             </div>
             
-            <Card>
-                <CardHeader><CardTitle>Lançamentos</CardTitle></CardHeader>
+            <Card className="rounded-2xl elevation-1">
+                <CardHeader><CardTitle className="text-lg">Lançamentos</CardTitle></CardHeader>
                 <CardContent>
-                    <div className="space-y-2">
+                    <div className="space-y-3">
                         {transactions && transactions.map(t => {
                             const detailName = t.type === 'Revenue'
                                 ? rideApps.find((app: RideApp) => app.id === t.categoryOrAppId)?.name
@@ -879,19 +894,19 @@ const History = ({ allPeriods, userId, categories, rideApps, onEditTransaction }
                                 : detailName || 'Desconhecido';
 
                             return (
-                                <div key={t.id} className="flex justify-between items-center p-4 bg-card border rounded-lg hover:shadow-md transition-all">
+                                <div key={t.id} className="flex justify-between items-center p-4 bg-accent/50 rounded-xl hover:bg-accent transition-all">
                                     <div className="flex-1">
-                                        <div className="flex items-center gap-2 mb-1">
+                                        <div className="flex items-center gap-3 mb-1">
                                             {t.type === 'Revenue' ? (
-                                                <div className="p-1 rounded-full bg-green-500/20">
-                                                    <PlusCircle className="h-4 w-4 text-green-400" />
+                                                <div className="p-2 rounded-full bg-success/20">
+                                                    <PlusCircle className="h-5 w-5 text-success" />
                                                 </div>
                                             ) : (
-                                                <div className="p-1 rounded-full bg-red-500/20">
-                                                    <MinusCircle className="h-4 w-4 text-red-400" />
+                                                <div className="p-2 rounded-full bg-error/20">
+                                                    <MinusCircle className="h-5 w-5 text-error" />
                                                 </div>
                                             )}
-                                            <p className={`font-bold text-lg ${t.type === 'Revenue' ? 'text-green-400' : 'text-red-400'}`}>
+                                            <p className={`font-bold text-lg ${t.type === 'Revenue' ? 'text-success' : 'text-error'}`}>
                                                 {t.type === 'Revenue' ? `+ ${formatCurrency(t.amount)}` : `- ${formatCurrency(t.amount)}`}
                                             </p>
                                         </div>
@@ -921,7 +936,7 @@ const History = ({ allPeriods, userId, categories, rideApps, onEditTransaction }
             </Card>
 
             <AlertDialog open={!!transactionToDelete} onOpenChange={() => setTransactionToDelete(null)}>
-                <AlertDialogContent>
+                <AlertDialogContent className="rounded-2xl">
                     <AlertDialogHeader>
                         <AlertDialogTitle>Deletar Transação?</AlertDialogTitle>
                         <AlertDialogDescription>
@@ -929,8 +944,8 @@ const History = ({ allPeriods, userId, categories, rideApps, onEditTransaction }
                         </AlertDialogDescription>
                     </AlertDialogHeader>
                     <AlertDialogFooter>
-                        <AlertDialogCancel>Cancelar</AlertDialogCancel>
-                        <AlertDialogAction onClick={handleDeleteTransaction} className="bg-destructive hover:bg-destructive/90">Deletar</AlertDialogAction>
+                        <AlertDialogCancel className="rounded-xl">Cancelar</AlertDialogCancel>
+                        <AlertDialogAction onClick={handleDeleteTransaction} className="rounded-xl bg-error hover:bg-error/90">Deletar</AlertDialogAction>
                     </AlertDialogFooter>
                 </AlertDialogContent>
             </AlertDialog>
@@ -947,7 +962,7 @@ const ForgotPasswordDialog = ({ isOpen, onOpenChange, onSendResetEmail }: { isOp
 
     return (
         <Dialog open={isOpen} onOpenChange={onOpenChange}>
-            <DialogContent>
+            <DialogContent className="rounded-2xl">
                 <DialogHeader>
                     <DialogTitle>Recuperar Senha</DialogTitle>
                     <DialogDescription>
@@ -963,12 +978,13 @@ const ForgotPasswordDialog = ({ isOpen, onOpenChange, onSendResetEmail }: { isOp
                             placeholder="seu@email.com"
                             value={email}
                             onChange={(e) => setEmail(e.target.value)}
+                            className="rounded-xl"
                         />
                     </div>
                 </div>
                 <DialogFooter>
-                    <Button variant="outline" onClick={() => onOpenChange(false)}>Cancelar</Button>
-                    <Button onClick={handleSendClick}>Enviar Link</Button>
+                    <Button variant="outline" onClick={() => onOpenChange(false)} className="rounded-xl">Cancelar</Button>
+                    <Button onClick={handleSendClick} className="rounded-xl gradient-primary">Enviar Link</Button>
                 </DialogFooter>
             </DialogContent>
         </Dialog>
@@ -1055,68 +1071,84 @@ const LoginScreen = () => {
 
   return (
     <>
-      <div className="flex flex-col items-center justify-center min-h-screen -mt-20">
-        <Card className="p-8 w-full max-w-sm">
-          <CardHeader>
-            <CardTitle className="text-2xl text-center">{isSignUp ? 'Criar Conta' : 'Bem vindo de Volta'}</CardTitle>
-            <CardDescription className="text-center">
-              {isSignUp ? 'Entre com seu e-mail e senha pra se registrar.' : 'Faça login para acompanhar suas viagens e finanças.'}
-            </CardDescription>
-          </CardHeader>
-          <CardContent className="space-y-4">
-            {error && <p className="text-red-500 text-sm text-center">{error}</p>}
-            <Input type="email" placeholder="E-mail" value={email} onChange={(e) => setEmail(e.target.value)} />
-            <div className="relative">
-              <Input 
-                type={showPassword ? 'text' : 'password'}
-                placeholder="Senha" 
-                value={password} 
-                onChange={(e) => setPassword(e.target.value)} 
-              />
-              <Button
-                type="button"
-                variant="ghost"
-                size="icon"
-                className="absolute inset-y-0 right-0 h-full px-3"
-                onClick={() => setShowPassword(!showPassword)}
-              >
-                {showPassword ? <EyeOff className="w-4 h-4" /> : <Eye className="w-4 h-4" />}
-              </Button>
+      <div className="flex flex-col items-center justify-center min-h-screen -mt-20 px-4">
+        <div className="w-full max-w-sm">
+          <div className="mb-8 text-center">
+            <div className="inline-flex items-center justify-center w-20 h-20 rounded-full gradient-primary elevation-3 mb-4">
+              <DriveWiseIcon className="h-10 w-10 text-primary-foreground" />
             </div>
-            {isSignUp && (
+            <h1 className="text-3xl font-bold mb-2">DriveWise</h1>
+            <p className="text-muted-foreground">
+              {isSignUp ? 'Crie sua conta para começar' : 'Faça login para acompanhar suas viagens e finanças'}
+            </p>
+          </div>
+          
+          <Card className="rounded-2xl elevation-2">
+            <CardHeader>
+              <CardTitle className="text-2xl text-center">{isSignUp ? 'Criar Conta' : 'Bem vindo de Volta'}</CardTitle>
+              <CardDescription className="text-center">
+                {isSignUp ? 'Entre com seu e-mail e senha para se registrar.' : 'Acesse sua conta para continuar'}
+              </CardDescription>
+            </CardHeader>
+            <CardContent className="space-y-4">
+              {error && <div className="p-3 bg-error/10 text-error rounded-xl text-sm text-center">{error}</div>}
+              <Input type="email" placeholder="E-mail" value={email} onChange={(e) => setEmail(e.target.value)} className="rounded-xl" />
               <div className="relative">
-                <Input
-                  type={showConfirmPassword ? 'text' : 'password'}
-                  placeholder="Confirmar Senha"
-                  value={confirmPassword}
-                  onChange={(e) => setConfirmPassword(e.target.value)}
+                <Input 
+                  type={showPassword ? 'text' : 'password'}
+                  placeholder="Senha" 
+                  value={password} 
+                  onChange={(e) => setPassword(e.target.value)} 
+                  className="rounded-xl pr-10"
                 />
                 <Button
                   type="button"
                   variant="ghost"
                   size="icon"
-                  className="absolute inset-y-0 right-0 h-full px-3"
-                  onClick={() => setShowConfirmPassword(!showConfirmPassword)}
+                  className="absolute right-1 top-1/2 -translate-y-1/2 h-8 w-8 rounded-lg"
+                  onClick={() => setShowPassword(!showPassword)}
                 >
-                  {showConfirmPassword ? <EyeOff className="w-4 h-4" /> : <Eye className="w-4 h-4" />}
+                  {showPassword ? <EyeOff className="w-4 h-4" /> : <Eye className="w-4 h-4" />}
                 </Button>
               </div>
-            )}
-            <Button onClick={handleAuthAction} className="w-full">
-              {isSignUp ? 'Cadastre-se' : 'Entrar'}
-            </Button>
+              {isSignUp && (
+                <div className="relative">
+                  <Input
+                    type={showConfirmPassword ? 'text' : 'password'}
+                    placeholder="Confirmar Senha"
+                    value={confirmPassword}
+                    onChange={(e) => setConfirmPassword(e.target.value)}
+                    className="rounded-xl pr-10"
+                  />
+                  <Button
+                    type="button"
+                    variant="ghost"
+                    size="icon"
+                    className="absolute right-1 top-1/2 -translate-y-1/2 h-8 w-8 rounded-lg"
+                    onClick={() => setShowConfirmPassword(!showConfirmPassword)}
+                  >
+                    {showConfirmPassword ? <EyeOff className="w-4 h-4" /> : <Eye className="w-4 h-4" />}
+                  </Button>
+                </div>
+              )}
+              <Button onClick={handleAuthAction} className="w-full rounded-xl py-6 gradient-primary elevation-2 hover:elevation-3 transition-all text-base">
+                {isSignUp ? 'Cadastre-se' : 'Entrar'}
+              </Button>
 
-            {!isSignUp && (
+              {!isSignUp && (
                  <Button variant="link" onClick={() => setIsForgotPasswordOpen(true)} className="w-full text-sm">
                     Esqueci minha senha
                 </Button>
-            )}
+              )}
 
-            <Button variant="link" onClick={() => { setIsSignUp(!isSignUp); setError(''); }} className="w-full">
-              {isSignUp ? 'Já tem uma conta? Faça login' : "Ainda não tem uma conta? Cadastre-se."}
-            </Button>
-          </CardContent>
-        </Card>
+              <div className="pt-2 border-t">
+                <Button variant="ghost" onClick={() => { setIsSignUp(!isSignUp); setError(''); }} className="w-full">
+                  {isSignUp ? 'Já tem uma conta? Faça login' : "Ainda não tem uma conta? Cadastre-se."}
+                </Button>
+              </div>
+            </CardContent>
+          </Card>
+        </div>
       </div>
       <ForgotPasswordDialog 
         isOpen={isForgotPasswordOpen}
