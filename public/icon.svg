@@ -26,43 +26,43 @@
     opacity="0.8"
   />
 
-  <!-- Car icon (left side) -->
-  <g transform="translate(80, 140)">
+  <!-- Car icon (left side, larger) -->
+  <g transform="translate(60, 120)">
     <!-- Car body -->
     <path
-      d="M10 50 H30 L35 35 H55 L62.5 50 H75 V70 H10 V50 Z"
+      d="M15 75 H45 L52.5 52.5 H82.5 L93.75 75 H120 V105 H15 V75 Z"
       fill="white"
       opacity="0.95"
     />
 
     <!-- Car roof -->
     <path
-      d="M37.5 35 L45 25 H50 L57.5 35"
+      d="M56.25 52.5 L67.5 37.5 H75 L86.25 52.5"
       fill="white"
       opacity="0.9"
     />
 
     <!-- Front wheel -->
-    <circle cx="25" cy="70" r="11" fill="white" opacity="0.95" />
-    <circle cx="25" cy="70" r="6" fill="url(#logoGradient)" />
+    <circle cx="37.5" cy="105" r="16.5" fill="white" opacity="0.95" />
+    <circle cx="37.5" cy="105" r="9" fill="url(#logoGradient)" />
 
     <!-- Rear wheel -->
-    <circle cx="60" cy="70" r="11" fill="white" opacity="0.95" />
-    <circle cx="60" cy="70" r="6" fill="url(#logoGradient)" />
+    <circle cx="90" cy="105" r="16.5" fill="white" opacity="0.95" />
+    <circle cx="90" cy="105" r="9" fill="url(#logoGradient)" />
 
     <!-- Headlights -->
-    <rect x="72.5" y="55" width="4" height="7.5" rx="1" fill="url(#accentGradient)" />
+    <rect x="108.75" y="82.5" width="6" height="11.25" rx="1.5" fill="url(#accentGradient)" />
   </g>
 
-  <!-- Dollar sign (right side, different color) -->
-  <g transform="translate(360, 256)">
+  <!-- Dollar sign (right side, larger) -->
+  <g transform="translate(380, 256)">
     <!-- Dollar symbol -->
     <text
       x="0"
       y="0"
       text-anchor="middle"
       dominant-baseline="central"
-      font-size="120"
+      font-size="160"
       font-weight="bold"
       fill="url(#accentGradient)"
       font-family="Inter, Arial, sans-serif"
