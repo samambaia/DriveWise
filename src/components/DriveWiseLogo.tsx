@@ -30,45 +30,45 @@ export function DriveWiseLogo(props: React.SVGProps<SVGSVGElement>) {
         opacity="0.2"
       />
       
-      {/* Car icon */}
-      <g transform="translate(120, 120)">
+      {/* Car icon (left side) */}
+      <g transform="translate(80, 140)">
         {/* Car body */}
         <path
-          d="M20 100 H60 L70 70 H110 L125 100 H150 V140 H20 V100 Z"
+          d="M10 50 H30 L35 35 H55 L62.5 50 H75 V70 H10 V50 Z"
           fill="white"
           opacity="0.95"
         />
-        
+
         {/* Car roof */}
         <path
-          d="M75 70 L90 50 H100 L115 70"
+          d="M37.5 35 L45 25 H50 L57.5 35"
           fill="white"
           opacity="0.9"
         />
-        
+
         {/* Front wheel */}
-        <circle cx="50" cy="140" r="22" fill="white" opacity="0.95" />
-        <circle cx="50" cy="140" r="12" fill="url(#logoGradient)" />
-        
+        <circle cx="25" cy="70" r="11" fill="white" opacity="0.95" />
+        <circle cx="25" cy="70" r="6" fill="url(#logoGradient)" />
+
         {/* Rear wheel */}
-        <circle cx="120" cy="140" r="22" fill="white" opacity="0.95" />
-        <circle cx="120" cy="140" r="12" fill="url(#logoGradient)" />
-        
+        <circle cx="60" cy="70" r="11" fill="white" opacity="0.95" />
+        <circle cx="60" cy="70" r="6" fill="url(#logoGradient)" />
+
         {/* Headlights */}
-        <rect x="145" y="110" width="8" height="15" rx="2" fill="url(#accentGradient)" />
+        <rect x="72.5" y="55" width="4" height="7.5" rx="1" fill="url(#accentGradient)" />
       </g>
-      
-      {/* Dollar sign in center */}
-      <g transform="translate(256, 256)">
+
+      {/* Dollar sign (right side, amber color) */}
+      <g transform="translate(360, 256)">
         {/* Dollar symbol */}
         <text
           x="0"
           y="0"
           textAnchor="middle"
           dominantBaseline="central"
-          fontSize="180"
+          fontSize="120"
           fontWeight="bold"
-          fill="white"
+          fill="url(#accentGradient)"
           fontFamily="Inter, Arial, sans-serif"
         >
           $
@@ -95,21 +95,41 @@ export function DriveWiseIcon(props: React.SVGProps<SVGSVGElement>) {
       fill="none"
       {...props}
     >
-      {/* Car silhouette */}
-      <path
-        d="M18.92 6.01C18.72 5.42 18.16 5 17.5 5h-11c-.66 0-1.21.42-1.42 1.01L3 12v8c0 .55.45 1 1 1h1c.55 0 1-.45 1-1v-1h12v1c0 .55.45 1 1 1h1c.55 0 1-.45 1-1v-8l-2.08-5.99zM6.5 16c-.83 0-1.5-.67-1.5-1.5S5.67 13 6.5 13s1.5.67 1.5 1.5S7.33 16 6.5 16zm11 0c-.83 0-1.5-.67-1.5-1.5s.67-1.5 1.5-1.5 1.5.67 1.5 1.5-.67 1.5-1.5 1.5z"
-        fill="currentColor"
-      />
-      
-      {/* Dollar sign overlay */}
+      <defs>
+        <linearGradient id="smallLogoGradient" x1="0%" y1="0%" x2="100%" y2="100%">
+          <stop offset="0%" stopColor="#00897B" />
+          <stop offset="100%" stopColor="#00695C" />
+        </linearGradient>
+        <linearGradient id="smallAccentGradient" x1="0%" y1="0%" x2="100%" y2="100%">
+          <stop offset="0%" stopColor="#FFA000" />
+          <stop offset="100%" stopColor="#FF8F00" />
+        </linearGradient>
+      </defs>
+
+      {/* Car silhouette (left side) */}
+      <g transform="translate(2, 4)">
+        {/* Car body */}
+        <path
+          d="M2 5 H5 L5.5 3.5 H8.5 L9.5 5 H11 V7 H2 V5 Z"
+          fill="currentColor"
+        />
+
+        {/* Front wheel */}
+        <circle cx="4" cy="7" r="1" fill="currentColor" />
+
+        {/* Rear wheel */}
+        <circle cx="9" cy="7" r="1" fill="currentColor" />
+      </g>
+
+      {/* Dollar sign (right side) */}
       <text
-        x="12"
-        y="13"
+        x="18"
+        y="12"
         textAnchor="middle"
         dominantBaseline="central"
-        fontSize="8"
+        fontSize="10"
         fontWeight="bold"
-        fill="white"
+        fill="currentColor"
         fontFamily="Inter, Arial, sans-serif"
       >
         $
