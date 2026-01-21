@@ -1,9 +1,9 @@
-
-
+ 
 'use client';
 
 import { useState, useEffect, useMemo } from 'react';
 import { useTheme } from '@/components/ThemeProvider';
+import { DriveWiseIcon } from '@/components/DriveWiseLogo';
 
 // Type Definitions
 interface Category {
@@ -93,32 +93,6 @@ const formatCurrency = (value: number) => {
 
 // #region Components
 
-const DriveWiseIcon = (props: React.SVGProps<SVGSVGElement>) => (
-    <svg
-      xmlns="http://www.w3.org/2000/svg"
-      viewBox="0 0 24 24"
-      fill="none"
-      stroke="currentColor"
-      strokeWidth="2"
-      strokeLinecap="round"
-      strokeLinejoin="round"
-      {...props}
-    >
-      <path d="M14.5 16.5a2.5 2.5 0 1 0 0-5 2.5 2.5 0 0 0 0 5z" />
-      <path d="M8.83 19.17a3 3 0 0 1-2.07-5.11l2.55-2.55a1 1 0 0 1 1.41 0l2.55 2.55a3 3 0 0 1-2.07 5.11z" />
-      <path d="M12 2a10 10 0 1 0 10 10" />
-      <path d="M12 12v-2" />
-      <path d="m16.24 7.76-.71.71" />
-      <path d="M18 12h-2" />
-      <path d="m16.24 16.24-.71-.71" />
-      <path d="M12 18v-2" />
-      <path d="m7.76 16.24.71-.71" />
-      <path d="M6 12H4" />
-      <path d="m7.76 7.76.71.71" />
-    </svg>
-);
-
-
 const Dashboard = ({ transactions, activePeriod, onOpenRevenue, onOpenExpense }: any) => {
   const { totalRevenue, totalExpenses, totalTrips } = useMemo(() => {
     if (!transactions) return { totalRevenue: 0, totalExpenses: 0, totalTrips: 0 };
@@ -153,7 +127,7 @@ const Dashboard = ({ transactions, activePeriod, onOpenRevenue, onOpenExpense }:
         </CardHeader>
         <CardContent className="text-center pb-8">
             <h2 className="text-sm text-primary-foreground/80 mb-4">Saldo Atual</h2>
-            <p className="text-6xl font-bold mb-2">
+            <p className="text-5xl font-bold mb-2">
                 {formatCurrency(currentBalance)}
             </p>
         </CardContent>
