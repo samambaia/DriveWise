@@ -64,7 +64,7 @@ export function TransactionModal({
       amount: transaction?.amount || undefined,
       categoryOrAppId: transaction?.categoryOrAppId || '',
       description: transaction?.description || '',
-      tripCount: transaction?.tripCount || 1,
+      tripCount: transaction?.tripCount || undefined,
     },
   });
 
@@ -78,7 +78,7 @@ export function TransactionModal({
       description: isEditMode 
         ? transaction?.description 
         : (defaultType === 'Revenue' ? (rideApps.find(app => app.id === form.getValues('categoryOrAppId'))?.name || 'Ride') : ''),
-      tripCount: transaction?.tripCount || 1,
+      tripCount: transaction?.tripCount || undefined,
     });
   }, [isOpen, transaction, defaultType, form, rideApps, isEditMode]);
   
@@ -104,7 +104,7 @@ export function TransactionModal({
       };
 
       if (data.type === 'Revenue') {
-        docData.tripCount = data.tripCount || 1;
+        docData.tripCount = data.tripCount;
         docData.description = rideApps.find(app => app.id === data.categoryOrAppId)?.name || 'Ride';
       } else {
         docData.description = data.description || '';
@@ -248,7 +248,6 @@ export function TransactionModal({
                          value={field.value ?? ''}
                          onChange={(e) => {
                            const value = e.target.value;
-                           // Allow only digits or an empty string
                            if (/^\d*$/.test(value)) {
                              const num = value === '' ? undefined : parseInt(value, 10);
                              field.onChange(num);
