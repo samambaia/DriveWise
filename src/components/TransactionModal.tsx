@@ -242,14 +242,17 @@ export function TransactionModal({
                     <FormLabel>Quantas Corridas</FormLabel>
                     <FormControl>
                        <Input
-                         type="number"
+                         type="text"
+                         inputMode="numeric"
                          {...field}
                          value={field.value ?? ''}
                          onChange={(e) => {
                            const value = e.target.value;
-                           // Allow the field to be empty, otherwise parse as an integer.
-                           // `undefined` is used for an empty field to work with the optional schema.
-                           field.onChange(value === '' ? undefined : parseInt(value, 10));
+                           // Allow only digits or an empty string
+                           if (/^\d*$/.test(value)) {
+                             const num = value === '' ? undefined : parseInt(value, 10);
+                             field.onChange(num);
+                           }
                          }}
                        />
                     </FormControl>
