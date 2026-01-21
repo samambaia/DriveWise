@@ -16,18 +16,22 @@ export function DriveWiseLogo(props: React.SVGProps<SVGSVGElement>) {
           <stop offset="0%" stopColor="#FFA000" />
           <stop offset="100%" stopColor="#FF8F00" />
         </linearGradient>
+        <linearGradient id="circleGradient" x1="0%" y1="0%" x2="100%" y2="100%">
+          <stop offset="0%" stopColor="#E0F2F1" />
+          <stop offset="100%" stopColor="#B2DFDB" />
+        </linearGradient>
       </defs>
-      
-      {/* Background circle with gradient */}
-      <circle cx="256" cy="256" r="240" fill="url(#logoGradient)" />
-      
+
+      {/* Background circle with visible border */}
+      <circle cx="256" cy="256" r="240" fill="url(#circleGradient)" stroke="url(#logoGradient)" strokeWidth="6" />
+
       {/* Outer ring */}
-      <circle 
-        cx="256" cy="256" r="220" 
-        fill="none" 
-        stroke="white" 
-        strokeWidth="8" 
-        opacity="0.2"
+      <circle
+        cx="256" cy="256" r="220"
+        fill="none"
+        stroke="url(#logoGradient)"
+        strokeWidth="4"
+        opacity="0.8"
       />
       
       {/* Car icon (left side) */}
