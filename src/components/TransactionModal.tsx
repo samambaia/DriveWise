@@ -1,4 +1,3 @@
-
 'use client';
 
 import { useEffect } from 'react';
@@ -6,7 +5,7 @@ import { useForm, Controller } from 'react-hook-form';
 import { zodResolver } from '@hookform/resolvers/zod';
 import * as z from 'zod';
 import { useFirebase } from '@/firebase';
-import { doc, setDoc, updateDoc, collection, serverTimestamp } from 'firebase/firestore';
+import { doc, setDoc, updateDoc, collection, serverTimestamp, deleteDoc } from 'firebase/firestore';
 import { Button } from '@/components/ui/button';
 import {
   Dialog,
@@ -21,6 +20,7 @@ import { Select, SelectContent, SelectItem, SelectTrigger, SelectValue } from '@
 import { CurrencyInput } from '@/components/ui/CurrencyInput';
 import { Form, FormControl, FormField, FormItem, FormLabel, FormMessage } from '@/components/ui/form';
 import { RadioGroup, RadioGroupItem } from '@/components/ui/radio-group';
+import { useToast } from '@/hooks/use-toast';
 
 const formSchema = z.object({
   type: z.enum(['Revenue', 'Expense']),
@@ -55,6 +55,7 @@ export function TransactionModal({
 }: TransactionModalProps) {
   const { firestore } = useFirebase();
   const isEditMode = !!transaction;
+  const { toast } = useToast();
 
   const form = useForm<TransactionFormValues>({
     resolver: zodResolver(formSchema),
@@ -85,6 +86,11 @@ export function TransactionModal({
   const onSubmit = async (data: TransactionFormValues) => {
     if (!firestore || !userId || !periodId) {
       console.error('Firestore, userId, or periodId not available.');
+      toast({
+        title: 'Erro',
+        description: 'Não foi possível salvar a transação. Tente novamente.',
+        variant: 'destructive',
+      });
       return;
     }
 
@@ -107,15 +113,22 @@ export function TransactionModal({
       if (isEditMode) {
         const transactionRef = doc(firestore, `users/${userId}/periods/${periodId}/transactions`, transaction.id);
         await updateDoc(transactionRef, docData);
+        toast({ title: 'Transação Atualizada', description: 'Suas alterações foram salvas.' });
       } else {
         const newTransactionRef = doc(collection(firestore, `users/${userId}/periods/${periodId}/transactions`));
         docData.id = newTransactionRef.id;
         await setDoc(newTransactionRef, docData);
+        toast({ title: 'Transação Salva', description: 'Sua nova transação foi registrada.' });
       }
 
       onClose();
     } catch (e) {
       console.error('Failed to save transaction:', e);
+      toast({
+        title: 'Erro ao Salvar',
+        description: 'Ocorreu um erro. Verifique sua conexão e tente novamente.',
+        variant: 'destructive',
+      });
     }
   };
 
@@ -136,7 +149,7 @@ export function TransactionModal({
               name="type"
               render={({ field }) => (
                 <FormItem className="space-y-3">
-                  <FormLabel>Type</FormLabel>
+                  <FormLabel>Tipo</FormLabel>
                   <FormControl>
                     <RadioGroup
                       onValueChange={field.onChange}
@@ -228,10 +241,16 @@ export function TransactionModal({
                   <FormItem>
                     <FormLabel>Quantas Corridas</FormLabel>
                     <FormControl>
-                       <Input 
-                         type="number" 
-                         {...field} 
-                         onChange={e => field.onChange(parseInt(e.target.value, 10) || 1)}
+                       <Input
+                         type="number"
+                         {...field}
+                         value={field.value ?? ''}
+                         onChange={(e) => {
+                           const value = e.target.value;
+                           // Allow the field to be empty, otherwise parse as an integer.
+                           // `undefined` is used for an empty field to work with the optional schema.
+                           field.onChange(value === '' ? undefined : parseInt(value, 10));
+                         }}
                        />
                     </FormControl>
                     <FormMessage />
