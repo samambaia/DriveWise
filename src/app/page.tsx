@@ -4,6 +4,7 @@
 import { useState, useEffect, useMemo } from 'react';
 import { useTheme } from '@/components/ThemeProvider';
 import { DriveWiseIcon } from '@/components/DriveWiseLogo';
+import { seedDatabase } from '@/utils/seedDatabase';
 
 // Type Definitions
 interface Category {
@@ -1184,6 +1185,11 @@ export default function IDriveApp() {
   // Fetch settings (Categories and RideApps)
   useEffect(() => {
     if (!firestore) return;
+
+    // Run seeder
+    seedDatabase(firestore).then(() => {
+      console.log('Database check/seed completed');
+    });
 
     const catUnsub = onSnapshot(
       collection(firestore, 'categories'),
