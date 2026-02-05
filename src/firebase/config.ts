@@ -1,8 +1,8 @@
 export const firebaseConfig = {
-  "projectId": "drivewise-app-2026",
-  "appId": "1:141575333878:web:15580111e11d13d86509d7",
-  "storageBucket": "drivewise-app-2026.firebasestorage.app",
-  "apiKey": "AIzaSyBLL51gClowi3LZxXFUT5k5b2Kqw_p20G8",
-  "authDomain": "drivewise-app-2026.firebaseapp.com",
-  "messagingSenderId": "141575333878"
+  "projectId": "studio-8451728536-d17e8",
+  "appId": "1:656255886350:web:cb176d7409427b78f6485f",
+  "storageBucket": "studio-8451728536-d17e8.firebasestorage.app",
+  "apiKey": "AIzaSyAMWQMLmpyT1d8Pgn4AlneDZ6XGlAXgBmo",
+  "authDomain": "studio-8451728536-d17e8.firebaseapp.com",
+  "messagingSenderId": "656255886350"
 };

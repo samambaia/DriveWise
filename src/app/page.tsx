@@ -928,7 +928,7 @@ const History = ({ allPeriods, userId, categories, rideApps, onEditTransaction }
   );
 };
 
-const ForgotPasswordDialog = ({ isOpen, onOpenChange, onSendResetEmail }: { isOpen: boolean, onOpenChange: (open: boolean) => void, onSendResetEmail: (email: string) => void }) => {
+const ForgotPasswordDialog = ({ isOpen, onOpenChange, onSendResetEmail, isLoading }: { isOpen: boolean, onOpenChange: (open: boolean) => void, onSendResetEmail: (email: string) => void, isLoading?: boolean }) => {
   const [email, setEmail] = useState('');
 
   const handleSendClick = () => {
@@ -954,12 +954,15 @@ const ForgotPasswordDialog = ({ isOpen, onOpenChange, onSendResetEmail }: { isOp
               value={email}
               onChange={(e) => setEmail(e.target.value)}
               className="rounded-xl"
+              disabled={isLoading}
             />
           </div>
         </div>
         <DialogFooter>
-          <Button variant="outline" onClick={() => onOpenChange(false)} className="rounded-xl">Cancelar</Button>
-          <Button onClick={handleSendClick} className="rounded-xl gradient-primary">Enviar Link</Button>
+          <Button variant="outline" onClick={() => onOpenChange(false)} className="rounded-xl" disabled={isLoading}>Cancelar</Button>
+          <Button onClick={handleSendClick} className="rounded-xl gradient-primary" disabled={isLoading}>
+            {isLoading ? 'Enviando...' : 'Enviar Link'}
+          </Button>
         </DialogFooter>
       </DialogContent>
     </Dialog>
@@ -1017,8 +1020,10 @@ const LoginScreen = () => {
     }
   };
 
+  const [isResettingPassword, setIsResettingPassword] = useState(false);
+
   const handlePasswordReset = async (resetEmail: string) => {
-    if (!auth || !resetEmail) {
+    if (!resetEmail) {
       toast({
         title: "Email Necessário",
         description: "Por favor, digite seu endereço de e-mail.",
@@ -1026,20 +1031,41 @@ const LoginScreen = () => {
       });
       return;
     }
+
+    if (!auth) {
+      toast({
+        title: "Erro de Conexão",
+        description: "Sistema de autenticação não disponível.",
+        variant: "destructive",
+      });
+      return;
+    }
+
+    setIsResettingPassword(true);
     try {
       await sendPasswordResetEmail(auth, resetEmail);
       toast({
         title: "Link Enviado",
-        description: "Verifique sua caixa de entrada para o link de redefinição de senha.",
+        description: `Enviamos um link de redefinição para ${resetEmail}. Verifique seu email.`,
       });
       setIsForgotPasswordOpen(false);
     } catch (e: any) {
+      console.error("Password reset error:", e);
+      let errorMessage = "Erro ao enviar email de redefinição.";
+
+      if (e.code === 'auth/user-not-found') {
+        errorMessage = "Email não encontrado.";
+      } else if (e.code === 'auth/invalid-email') {
+        errorMessage = "Email inválido.";
+      }
+
       toast({
         title: "Erro",
-        description: e.message,
+        description: errorMessage,
         variant: "destructive",
       });
-      console.error("Password reset error:", e);
+    } finally {
+      setIsResettingPassword(false);
     }
   };
 
@@ -1129,6 +1155,7 @@ const LoginScreen = () => {
         isOpen={isForgotPasswordOpen}
         onOpenChange={setIsForgotPasswordOpen}
         onSendResetEmail={handlePasswordReset}
+        isLoading={isResettingPassword}
       />
     </>
   );
