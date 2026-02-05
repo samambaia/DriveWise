@@ -1,4 +1,4 @@
- 
+
 'use client';
 
 import { useState, useEffect, useMemo } from 'react';
@@ -115,9 +115,9 @@ const Dashboard = ({ transactions, activePeriod, onOpenRevenue, onOpenExpense }:
   const initialBalance = activePeriod?.initialBalance || 0;
 
   const progress = targetBalance > initialBalance
-      ? ((currentBalance - initialBalance) / (targetBalance - initialBalance)) * 100
-      : 0;
-      
+    ? ((currentBalance - initialBalance) / (targetBalance - initialBalance)) * 100
+    : 0;
+
   return (
     <div className="space-y-6">
       <Card className="gradient-primary text-primary-foreground rounded-2xl elevation-3 overflow-hidden">
@@ -126,32 +126,32 @@ const Dashboard = ({ transactions, activePeriod, onOpenRevenue, onOpenExpense }:
           <CardDescription className="text-primary-foreground/80">Seu resumo financeiro para o período</CardDescription>
         </CardHeader>
         <CardContent className="text-center pb-8">
-            <h2 className="text-sm text-primary-foreground/80 mb-4">Saldo Atual</h2>
-            <p className="text-5xl font-bold mb-2">
-                {formatCurrency(currentBalance)}
-            </p>
+          <h2 className="text-sm text-primary-foreground/80 mb-4">Saldo Atual</h2>
+          <p className="text-5xl font-bold mb-2">
+            {formatCurrency(currentBalance)}
+          </p>
         </CardContent>
       </Card>
-      
+
       {activePeriod && (
         <Card className="rounded-2xl elevation-2 bg-gradient-to-br from-card to-primary-container/30">
           <CardHeader className="flex flex-row items-center justify-between">
-              <div>
-                  <CardTitle className="text-xl">Progresso da Meta</CardTitle>
-                  <CardDescription>Seu progresso até o objetivo</CardDescription>
-              </div>
-              <div className="h-16 w-16 relative">
-                  <svg className="h-16 w-16 transform -rotate-90">
-                      <circle cx="32" cy="32" r="28" fill="none" stroke="currentColor" strokeWidth="4" className="text-muted" />
-                      <circle cx="32" cy="32" r="28" fill="none" stroke="currentColor" strokeWidth="4" 
-                              strokeDasharray={175.93} 
-                              strokeDashoffset={175.93 - (175.93 * Math.max(0, Math.min(100, progress)) / 100)} 
-                              className="text-primary transition-all duration-1000 ease-out" />
-                  </svg>
-                  <span className="absolute inset-0 flex items-center justify-center text-sm font-bold">
-                      {Math.round(progress)}%
-                  </span>
-              </div>
+            <div>
+              <CardTitle className="text-xl">Progresso da Meta</CardTitle>
+              <CardDescription>Seu progresso até o objetivo</CardDescription>
+            </div>
+            <div className="h-16 w-16 relative">
+              <svg className="h-16 w-16 transform -rotate-90">
+                <circle cx="32" cy="32" r="28" fill="none" stroke="currentColor" strokeWidth="4" className="text-muted" />
+                <circle cx="32" cy="32" r="28" fill="none" stroke="currentColor" strokeWidth="4"
+                  strokeDasharray={175.93}
+                  strokeDashoffset={175.93 - (175.93 * Math.max(0, Math.min(100, progress)) / 100)}
+                  className="text-primary transition-all duration-1000 ease-out" />
+              </svg>
+              <span className="absolute inset-0 flex items-center justify-center text-sm font-bold">
+                {Math.round(progress)}%
+              </span>
+            </div>
           </CardHeader>
           <CardContent>
             <Progress value={Math.max(0, Math.min(100, progress))} className="w-full h-2" />
@@ -165,10 +165,10 @@ const Dashboard = ({ transactions, activePeriod, onOpenRevenue, onOpenExpense }:
 
       <div className="grid grid-cols-2 gap-4">
         <Button onClick={onOpenRevenue} className="p-6 text-lg gradient-success elevation-2 rounded-2xl hover:elevation-3 transition-all">
-          <PlusCircle className="mr-2 h-5 w-5"/> Receita
+          <PlusCircle className="mr-2 h-5 w-5" /> Receita
         </Button>
         <Button onClick={onOpenExpense} className="p-6 text-lg gradient-error elevation-2 rounded-2xl hover:elevation-3 transition-all">
-          <MinusCircle className="mr-2 h-5 w-5"/> Despesa
+          <MinusCircle className="mr-2 h-5 w-5" /> Despesa
         </Button>
       </div>
 
@@ -203,766 +203,766 @@ const Dashboard = ({ transactions, activePeriod, onOpenRevenue, onOpenExpense }:
 };
 
 const Settings = ({ categories, rideApps, activePeriod, userId, onCategoryDeleted, onRideAppDeleted, theme, onThemeChange }: any) => {
-    const { firestore, auth } = useFirebase();
-    const { toast } = useToast();
-    const [newCategory, setNewCategory] = useState('');
-    const [newRideApp, setNewRideApp] = useState('');
-    const [isSavingPeriod, setIsSavingPeriod] = useState(false);
-    const [categoryToDelete, setCategoryToDelete] = useState<Category | null>(null);
-    const [rideAppToDelete, setRideAppToDelete] = useState<RideApp | null>(null);
-    const [isCheckingUsage, setIsCheckingUsage] = useState(false);
-    const [usageCount, setUsageCount] = useState(0);
-    const [categoryUsageCounts, setCategoryUsageCounts] = useState<Record<string, number>>({});
-    const [rideAppUsageCounts, setRideAppUsageCounts] = useState<Record<string, number>>({});
-    
-    const [startDate, setStartDate] = useState('');
-    const [endDate, setEndDate] = useState('');
-    const [initialBalance, setInitialBalance] = useState<number | undefined>(0);
-    const [targetBalance, setTargetBalance] = useState<number | undefined>(0);
+  const { firestore, auth } = useFirebase();
+  const { toast } = useToast();
+  const [newCategory, setNewCategory] = useState('');
+  const [newRideApp, setNewRideApp] = useState('');
+  const [isSavingPeriod, setIsSavingPeriod] = useState(false);
+  const [categoryToDelete, setCategoryToDelete] = useState<Category | null>(null);
+  const [rideAppToDelete, setRideAppToDelete] = useState<RideApp | null>(null);
+  const [isCheckingUsage, setIsCheckingUsage] = useState(false);
+  const [usageCount, setUsageCount] = useState(0);
+  const [categoryUsageCounts, setCategoryUsageCounts] = useState<Record<string, number>>({});
+  const [rideAppUsageCounts, setRideAppUsageCounts] = useState<Record<string, number>>({});
 
-    const toLocalDateString = (date: Date | null | undefined) => {
-        if (!date) return '';
-        // Adjust for timezone offset before converting to ISO string
-        const adjustedDate = new Date(date.getTime() - (date.getTimezoneOffset() * 60000));
-        return adjustedDate.toISOString().split('T')[0];
+  const [startDate, setStartDate] = useState('');
+  const [endDate, setEndDate] = useState('');
+  const [initialBalance, setInitialBalance] = useState<number | undefined>(0);
+  const [targetBalance, setTargetBalance] = useState<number | undefined>(0);
+
+  const toLocalDateString = (date: Date | null | undefined) => {
+    if (!date) return '';
+    // Adjust for timezone offset before converting to ISO string
+    const adjustedDate = new Date(date.getTime() - (date.getTimezoneOffset() * 60000));
+    return adjustedDate.toISOString().split('T')[0];
+  }
+
+  useEffect(() => {
+    if (activePeriod) {
+      setStartDate(toLocalDateString(activePeriod.startDate?.toDate()));
+      setEndDate(toLocalDateString(activePeriod.endDate?.toDate()));
+      setInitialBalance(activePeriod.initialBalance || 0);
+      setTargetBalance(activePeriod.targetBalance || 0);
+    } else {
+      // If there's no active period, clear the fields
+      setStartDate('');
+      setEndDate('');
+      setInitialBalance(0);
+      setTargetBalance(0);
+    }
+  }, [activePeriod]);
+
+  // Calculate usage counts for categories and ride apps
+  useEffect(() => {
+    if (!firestore || !userId) return;
+
+    const calculateUsage = async () => {
+      try {
+        const periodsSnapshot = await getDocs(collection(firestore, `users/${userId}/periods`));
+        const catCounts: Record<string, number> = {};
+        const appCounts: Record<string, number> = {};
+
+        for (const periodDoc of periodsSnapshot.docs) {
+          const transactionsSnapshot = await getDocs(
+            collection(firestore, `users/${userId}/periods/${periodDoc.id}/transactions`)
+          );
+
+          transactionsSnapshot.forEach(transactionDoc => {
+            const data = transactionDoc.data();
+            if (data.type === 'Expense') {
+              catCounts[data.categoryOrAppId] = (catCounts[data.categoryOrAppId] || 0) + 1;
+            } else if (data.type === 'Revenue') {
+              appCounts[data.categoryOrAppId] = (appCounts[data.categoryOrAppId] || 0) + 1;
+            }
+          });
+        }
+
+        setCategoryUsageCounts(catCounts);
+        setRideAppUsageCounts(appCounts);
+      } catch (error) {
+        console.error('Error calculating usage:', error);
+      }
+    };
+
+    calculateUsage();
+  }, [firestore, userId, categories, rideApps]);
+
+
+  const handleAddCategory = async () => {
+    if (newCategory.trim() === '' || !firestore) return;
+
+    const isDuplicate = categories.some(
+      (cat: any) => cat.name.trim().toLowerCase() === newCategory.trim().toLowerCase()
+    );
+
+    if (isDuplicate) {
+      toast({
+        title: "Categoria Duplicada",
+        description: "Esta categoria já existe.",
+        variant: "destructive",
+      });
+      return;
     }
 
-    useEffect(() => {
-        if (activePeriod) {
-            setStartDate(toLocalDateString(activePeriod.startDate?.toDate()));
-            setEndDate(toLocalDateString(activePeriod.endDate?.toDate()));
-            setInitialBalance(activePeriod.initialBalance || 0);
-            setTargetBalance(activePeriod.targetBalance || 0);
-        } else {
-            // If there's no active period, clear the fields
-            setStartDate('');
-            setEndDate('');
-            setInitialBalance(0);
-            setTargetBalance(0);
-        }
-    }, [activePeriod]);
+    try {
+      const newCatRef = doc(collection(firestore, 'categories'));
+      await setDoc(newCatRef, { id: newCatRef.id, name: newCategory });
+      setNewCategory('');
+      toast({ title: "Categoria Adicionada", description: `"${newCategory}" foi adicionado.` });
+    } catch (e) {
+      console.error("Error adding category: ", e);
+      toast({ title: "Erro", description: "Não foi possível adicionar a categoria.", variant: "destructive" });
+    }
+  };
 
-    // Calculate usage counts for categories and ride apps
-    useEffect(() => {
-        if (!firestore || !userId) return;
-        
-        const calculateUsage = async () => {
-            try {
-                const periodsSnapshot = await getDocs(collection(firestore, `users/${userId}/periods`));
-                const catCounts: Record<string, number> = {};
-                const appCounts: Record<string, number> = {};
-                
-                for (const periodDoc of periodsSnapshot.docs) {
-                    const transactionsSnapshot = await getDocs(
-                        collection(firestore, `users/${userId}/periods/${periodDoc.id}/transactions`)
-                    );
-                    
-                    transactionsSnapshot.forEach(transactionDoc => {
-                        const data = transactionDoc.data();
-                        if (data.type === 'Expense') {
-                            catCounts[data.categoryOrAppId] = (catCounts[data.categoryOrAppId] || 0) + 1;
-                        } else if (data.type === 'Revenue') {
-                            appCounts[data.categoryOrAppId] = (appCounts[data.categoryOrAppId] || 0) + 1;
-                        }
-                    });
-                }
-                
-                setCategoryUsageCounts(catCounts);
-                setRideAppUsageCounts(appCounts);
-            } catch (error) {
-                console.error('Error calculating usage:', error);
-            }
-        };
-        
-        calculateUsage();
-    }, [firestore, userId, categories, rideApps]);
+  const handleDeleteCategory = async (categoryId: string) => {
+    if (!firestore || !userId) return;
 
+    // First, check if category is being used
+    setIsCheckingUsage(true);
+    try {
+      const periodsSnapshot = await getDocs(collection(firestore, `users/${userId}/periods`));
+      let count = 0;
 
-    const handleAddCategory = async () => {
-        if (newCategory.trim() === '' || !firestore) return;
-        
-        const isDuplicate = categories.some(
-            (cat: any) => cat.name.trim().toLowerCase() === newCategory.trim().toLowerCase()
+      for (const periodDoc of periodsSnapshot.docs) {
+        const transactionsQuery = query(
+          collection(firestore, `users/${userId}/periods/${periodDoc.id}/transactions`),
+          where('categoryOrAppId', '==', categoryId),
+          where('type', '==', 'Expense')
         );
-
-        if (isDuplicate) {
-            toast({
-                title: "Categoria Duplicada",
-                description: "Esta categoria já existe.",
-                variant: "destructive",
-            });
-            return;
-        }
-
-        try {
-            const newCatRef = doc(collection(firestore, 'categories'));
-            await setDoc(newCatRef, { id: newCatRef.id, name: newCategory });
-            setNewCategory('');
-             toast({ title: "Categoria Adicionada", description: `"${newCategory}" foi adicionado.` });
-        } catch (e) {
-            console.error("Error adding category: ", e);
-            toast({ title: "Erro", description: "Não foi possível adicionar a categoria.", variant: "destructive" });
-        }
-    };
-    
-    const handleDeleteCategory = async (categoryId: string) => {
-      if (!firestore || !userId) return;
-      
-      // First, check if category is being used
-      setIsCheckingUsage(true);
-      try {
-        const periodsSnapshot = await getDocs(collection(firestore, `users/${userId}/periods`));
-        let count = 0;
-        
-        for (const periodDoc of periodsSnapshot.docs) {
-          const transactionsQuery = query(
-            collection(firestore, `users/${userId}/periods/${periodDoc.id}/transactions`),
-            where('categoryOrAppId', '==', categoryId),
-            where('type', '==', 'Expense')
-          );
-          const transactionsSnapshot = await getDocs(transactionsQuery);
-          count += transactionsSnapshot.size;
-        }
-        
-        setUsageCount(count);
-        const category = categories.find((c: Category) => c.id === categoryId);
-        setCategoryToDelete(category || null);
-      } catch (e) {
-        console.error('Error checking category usage:', e);
-        toast({ 
-          title: "Erro", 
-          description: "Não foi possível verificar o uso da categoria.", 
-          variant: "destructive" 
-        });
-      } finally {
-        setIsCheckingUsage(false);
+        const transactionsSnapshot = await getDocs(transactionsQuery);
+        count += transactionsSnapshot.size;
       }
-    };
-    
-    const confirmDeleteCategory = async () => {
-      if (!firestore || !categoryToDelete) return;
-      try {
-        console.log('Attempting to delete category:', categoryToDelete.id);
-        await deleteDoc(doc(firestore, 'categories', categoryToDelete.id));
-        console.log('Category deleted successfully');
-        
-        // Notify parent component to update state
-        if (onCategoryDeleted) {
-          onCategoryDeleted(categoryToDelete.id);
-        }
-        
-        toast({ 
-          title: "Categoria Deletada", 
-          description: `"${categoryToDelete.name}" foi removida com sucesso.` 
-        });
-      } catch (e) {
-        console.error("Error deleting category: ", e);
-        toast({ 
-          title: "Erro", 
-          description: "Não foi possível deletar a categoria. Verifique as permissões do Firestore.", 
-          variant: "destructive" 
-        });
-      } finally {
-        setCategoryToDelete(null);
-        setUsageCount(0);
+
+      setUsageCount(count);
+      const category = categories.find((c: Category) => c.id === categoryId);
+      setCategoryToDelete(category || null);
+    } catch (e) {
+      console.error('Error checking category usage:', e);
+      toast({
+        title: "Erro",
+        description: "Não foi possível verificar o uso da categoria.",
+        variant: "destructive"
+      });
+    } finally {
+      setIsCheckingUsage(false);
+    }
+  };
+
+  const confirmDeleteCategory = async () => {
+    if (!firestore || !categoryToDelete) return;
+    try {
+      console.log('Attempting to delete category:', categoryToDelete.id);
+      await deleteDoc(doc(firestore, 'categories', categoryToDelete.id));
+      console.log('Category deleted successfully');
+
+      // Notify parent component to update state
+      if (onCategoryDeleted) {
+        onCategoryDeleted(categoryToDelete.id);
       }
-    };
-    
-    const handleAddRideApp = async () => {
-        if (newRideApp.trim() === '' || !firestore) return;
 
-        const isDuplicate = rideApps.some(
-            (app: any) => app.name.trim().toLowerCase() === newRideApp.trim().toLowerCase()
-        );
+      toast({
+        title: "Categoria Deletada",
+        description: `"${categoryToDelete.name}" foi removida com sucesso.`
+      });
+    } catch (e) {
+      console.error("Error deleting category: ", e);
+      toast({
+        title: "Erro",
+        description: "Não foi possível deletar a categoria. Verifique as permissões do Firestore.",
+        variant: "destructive"
+      });
+    } finally {
+      setCategoryToDelete(null);
+      setUsageCount(0);
+    }
+  };
 
-        if (isDuplicate) {
-            toast({
-                title: "App de Corrida Duplicado",
-                description: "Este app de corrida já existe.",
-                variant: "destructive",
-            });
-            return;
-        }
+  const handleAddRideApp = async () => {
+    if (newRideApp.trim() === '' || !firestore) return;
 
-        try {
-            const newAppRef = doc(collection(firestore, 'rideApps'));
-            await setDoc(newAppRef, { id: newAppRef.id, name: newRideApp });
-            setNewRideApp('');
-            toast({ title: "App de Corrida Adicionado", description: `"${newRideApp}" foi adicionado.` });
-        } catch (e) {
-            console.error("Error adding ride app: ", e);
-            toast({ title: "Erro", description: "Não foi possível adicionar o app de corrida.", variant: "destructive" });
-        }
-    };
-
-    const handleDeleteRideApp = async (appId: string) => {
-      if (!firestore || !userId) return;
-      
-      // First, check if ride app is being used
-      setIsCheckingUsage(true);
-      try {
-        const periodsSnapshot = await getDocs(collection(firestore, `users/${userId}/periods`));
-        let count = 0;
-        
-        for (const periodDoc of periodsSnapshot.docs) {
-          const transactionsQuery = query(
-            collection(firestore, `users/${userId}/periods/${periodDoc.id}/transactions`),
-            where('categoryOrAppId', '==', appId),
-            where('type', '==', 'Revenue')
-          );
-          const transactionsSnapshot = await getDocs(transactionsQuery);
-          count += transactionsSnapshot.size;
-        }
-        
-        setUsageCount(count);
-        const app = rideApps.find((a: RideApp) => a.id === appId);
-        setRideAppToDelete(app || null);
-      } catch (e) {
-        console.error('Error checking ride app usage:', e);
-        toast({ 
-          title: "Erro", 
-          description: "Não foi possível verificar o uso do app de corrida.", 
-          variant: "destructive" 
-        });
-      } finally {
-        setIsCheckingUsage(false);
-      }
-    };
-
-    const confirmDeleteRideApp = async () => {
-      if (!firestore || !rideAppToDelete) return;
-      
-      try {
-        const docRef = doc(firestore, 'rideApps', rideAppToDelete.id);
-        await deleteDoc(docRef);
-        
-        // Notify parent component to update state
-        if (onRideAppDeleted) {
-          onRideAppDeleted(rideAppToDelete.id);
-        }
-        
-        toast({ 
-          title: "App de Corrida Deletado", 
-          description: `"${rideAppToDelete.name}" foi removido com sucesso.` 
-        });
-      } catch (e: any) {
-        console.error("Error deleting ride app:", e);
-        toast({ 
-          title: "Erro", 
-          description: `Não foi possível deletar: ${e.code || e.message}`, 
-          variant: "destructive" 
-        });
-      } finally {
-        setRideAppToDelete(null);
-        setUsageCount(0);
-      }
-    };
-
-    const handleActivateNewPeriod = async () => {
-        if (!startDate || !endDate || initialBalance === undefined || targetBalance === undefined || !firestore || !userId) {
-            toast({
-                title: "Campos Incompletos",
-                description: "Por favor, preencha todos os campos do período.",
-                variant: "destructive",
-            });
-            return;
-        }
-
-        setIsSavingPeriod(true);
-
-        try {
-            const batch = writeBatch(firestore);
-
-            // Deactivate all existing periods for the user
-            const periodsQuery = query(collection(firestore, `users/${userId}/periods`), where("isActive", "==", true));
-            const activePeriodsSnapshot = await getDocs(periodsQuery);
-            activePeriodsSnapshot.forEach(periodDoc => {
-                batch.update(periodDoc.ref, { isActive: false });
-            });
-
-            const newPeriodRef = doc(collection(firestore, `users/${userId}/periods`));
-            
-            const startTimestamp = Timestamp.fromDate(new Date(`${startDate}T00:00:00`));
-            const endTimestamp = Timestamp.fromDate(new Date(`${endDate}T23:59:59`));
-
-            batch.set(newPeriodRef, {
-                id: newPeriodRef.id,
-                startDate: startTimestamp,
-                endDate: endTimestamp,
-                initialBalance: initialBalance,
-                targetBalance: targetBalance,
-                isActive: true,
-            });
-
-            await batch.commit();
-            toast({
-                title: "Período Ativado!",
-                description: "O novo período foi iniciado com sucesso."
-            });
-            
-        } catch (e) {
-            console.error("Error activating new period: ", e);
-            toast({
-                title: "Erro ao Ativar Período",
-                description: "Ocorreu um erro ao salvar o novo período. Tente novamente.",
-                variant: "destructive",
-            });
-        } finally {
-            setIsSavingPeriod(false);
-        }
-    };
-    
-    return (
-        <div className="space-y-6">
-            <Card className="rounded-2xl elevation-1">
-                <CardHeader>
-                    <CardTitle>Aparência</CardTitle>
-                    <CardDescription>Personalize a aparência da aplicação</CardDescription>
-                </CardHeader>
-                <CardContent>
-                    <div className="flex items-center justify-between p-4 bg-accent rounded-xl">
-                        <div className="flex items-center gap-4">
-                            {theme === 'dark' ? (
-                                <div className="p-3 rounded-full bg-primary/20">
-                                    <Moon className="h-6 w-6 text-primary" />
-                                </div>
-                            ) : (
-                                <div className="p-3 rounded-full bg-tertiary/20">
-                                    <Sun className="h-6 w-6 text-tertiary" />
-                                </div>
-                            )}
-                            <div>
-                                <p className="font-medium text-lg">Tema {theme === 'dark' ? 'Escuro' : 'Claro'}</p>
-                                <p className="text-sm text-muted-foreground">
-                                    {theme === 'dark' ? 'Reduz o brilho da tela' : 'Interface com mais luz'}
-                                </p>
-                            </div>
-                        </div>
-                        <div className="flex items-center gap-4">
-                            <Sun className="h-5 w-5 text-muted-foreground" />
-                            <Switch
-                                checked={theme === 'dark'}
-                                onCheckedChange={(checked) => onThemeChange(checked ? 'dark' : 'light')}
-                                className="scale-110"
-                            />
-                            <Moon className="h-5 w-5 text-muted-foreground" />
-                        </div>
-                    </div>
-                </CardContent>
-            </Card>
-
-            <Card className="rounded-2xl elevation-2">
-                <CardHeader>
-                    <CardTitle>Configuração Período</CardTitle>
-                    <CardDescription>{activePeriod ? 'Edite o período atual ou comece um novo.' : 'Defina um novo período para iniciar o rastreamento.'}</CardDescription>
-                </CardHeader>
-                <CardContent className="space-y-5">
-                    <div className="space-y-2">
-                      <Label htmlFor="startDate" className="text-base font-medium">Período</Label>
-                      <div className="grid grid-cols-2 gap-4">
-                        <Input id="startDate" type="date" value={startDate} onChange={(e) => setStartDate(e.target.value)} className="rounded-xl" />
-                        <Input type="date" value={endDate} onChange={(e) => setEndDate(e.target.value)} className="rounded-xl" />
-                      </div>
-                    </div>
-                    <div className="grid grid-cols-2 gap-4">
-                      <div className="space-y-2">
-                        <Label htmlFor="initialBalance" className="text-base font-medium">Saldo Inicial</Label>
-                        <CurrencyInput id="initialBalance" value={initialBalance || 0} onValueChange={(value) => setInitialBalance(value)} className="rounded-xl" />
-                      </div>
-                      <div className="space-y-2">
-                        <Label htmlFor="targetBalance" className="text-base font-medium">Objetivo do Período</Label>
-                        <CurrencyInput id="targetBalance" value={targetBalance || 0} onValueChange={(value) => setTargetBalance(value)} className="rounded-xl" />
-                      </div>
-                    </div>
-                    <Button onClick={handleActivateNewPeriod} disabled={isSavingPeriod} className="w-full rounded-xl py-6 gradient-primary elevation-2 hover:elevation-3 transition-all text-base">
-                        {isSavingPeriod ? 'Salvando...' : (activePeriod ? 'Ativar Novo Período' : 'Ativar Período')}
-                    </Button>
-                    <p className="text-xs text-muted-foreground text-center">Nota: Ativar um novo período vai arquivar o atual.</p>
-                </CardContent>
-            </Card>
-
-            <div className="grid grid-cols-1 md:grid-cols-2 gap-6">
-              <Card className="rounded-2xl elevation-1">
-                <CardHeader>
-                  <CardTitle>Categorias de Despesa</CardTitle>
-                </CardHeader>
-                <CardContent>
-                  <div className="flex gap-3 mb-6">
-                    <Input value={newCategory} onChange={e => setNewCategory(e.target.value)} placeholder="Nova Categoria" className="rounded-xl" />
-                    <Button onClick={handleAddCategory} className="rounded-xl px-6">Add</Button>
-                  </div>
-                  <ul className="space-y-3">
-                    {categories && categories.map((cat: Category) => (
-                      <li key={cat.id} className="flex justify-between items-center p-3 bg-accent/50 rounded-xl group hover:bg-accent transition-all">
-                        <div className="flex items-center gap-3">
-                          <span className="font-medium">{cat.name}</span>
-                          {categoryUsageCounts[cat.id] > 0 && (
-                            <span className="text-xs bg-primary/20 text-primary px-2.5 py-1 rounded-full">
-                              {categoryUsageCounts[cat.id]} uso{categoryUsageCounts[cat.id] !== 1 ? 's' : ''}
-                            </span>
-                          )}
-                        </div>
-                        <Button 
-                          variant="ghost" 
-                          size="icon" 
-                          onClick={() => handleDeleteCategory(cat.id)}
-                          disabled={isCheckingUsage}
-                          className="opacity-0 group-hover:opacity-100 transition-all hover:bg-error hover:text-error-foreground rounded-lg"
-                        >
-                          <Trash2 className="h-5 w-5"/>
-                        </Button>
-                      </li>
-                    ))}
-                  </ul>
-                </CardContent>
-              </Card>
-
-              <Card className="rounded-2xl elevation-1">
-                <CardHeader>
-                  <CardTitle>Apps de Corrida</CardTitle>
-                </CardHeader>
-                <CardContent>
-                  <div className="flex gap-3 mb-6">
-                    <Input value={newRideApp} onChange={e => setNewRideApp(e.target.value)} placeholder="Novo App de Corrida" className="rounded-xl" />
-                    <Button onClick={handleAddRideApp} className="rounded-xl px-6">Add</Button>
-                  </div>
-                  <ul className="space-y-3">
-                    {rideApps && rideApps.map((app: RideApp) => (
-                      <li key={app.id} className="flex justify-between items-center p-3 bg-accent/50 rounded-xl group hover:bg-accent transition-all">
-                        <div className="flex items-center gap-3">
-                          <span className="font-medium">{app.name}</span>
-                          {rideAppUsageCounts[app.id] > 0 && (
-                            <span className="text-xs bg-secondary/20 text-secondary px-2.5 py-1 rounded-full">
-                              {rideAppUsageCounts[app.id]} uso{rideAppUsageCounts[app.id] !== 1 ? 's' : ''}
-                            </span>
-                          )}
-                        </div>
-                         <Button 
-                           variant="ghost" 
-                           size="icon" 
-                           onClick={() => handleDeleteRideApp(app.id)}
-                           disabled={isCheckingUsage}
-                           className="opacity-0 group-hover:opacity-100 transition-all hover:bg-error hover:text-error-foreground rounded-lg"
-                         >
-                           <Trash2 className="h-5 w-5"/>
-                         </Button>
-                      </li>
-                    ))}
-                  </ul>
-                </CardContent>
-              </Card>
-            </div>
-
-            {/* Confirmation Dialog for Category Deletion */}
-            <AlertDialog open={!!categoryToDelete} onOpenChange={() => setCategoryToDelete(null)}>
-                <AlertDialogContent className="rounded-2xl">
-                    <AlertDialogHeader>
-                        <AlertDialogTitle>Deletar Categoria?</AlertDialogTitle>
-                        <AlertDialogDescription>
-                            {usageCount > 0 ? (
-                                <>
-                                    <span className="text-warning font-semibold">Atenção:</span> A categoria "{categoryToDelete?.name}" está sendo usada em <span className="font-bold">{usageCount}</span> transação{usageCount !== 1 ? 'ões' : ''}.
-                                    <br /><br />
-                                    Ao deletar esta categoria, as transações associadas exibirão "Desconhecido" como categoria.
-                                    <br /><br />
-                                    Tem certeza que deseja continuar?
-                                </>
-                            ) : (
-                                `Tem certeza que deseja deletar a categoria "${categoryToDelete?.name}"? Esta ação não pode ser desfeita.`
-                            )}
-                        </AlertDialogDescription>
-                    </AlertDialogHeader>
-                    <AlertDialogFooter>
-                        <AlertDialogCancel className="rounded-xl">Cancelar</AlertDialogCancel>
-                        <AlertDialogAction 
-                            onClick={confirmDeleteCategory} 
-                            className="rounded-xl bg-error hover:bg-error/90"
-                        >
-                            Deletar
-                        </AlertDialogAction>
-                    </AlertDialogFooter>
-                </AlertDialogContent>
-            </AlertDialog>
-
-            {/* Confirmation Dialog for RideApp Deletion */}
-            <AlertDialog open={!!rideAppToDelete} onOpenChange={() => setRideAppToDelete(null)}>
-                <AlertDialogContent className="rounded-2xl">
-                    <AlertDialogHeader>
-                        <AlertDialogTitle>Deletar App de Corrida?</AlertDialogTitle>
-                        <AlertDialogDescription>
-                            {usageCount > 0 ? (
-                                <>
-                                    <span className="text-warning font-semibold">Atenção:</span> O app "{rideAppToDelete?.name}" está sendo usado em <span className="font-bold">{usageCount}</span> transação{usageCount !== 1 ? 'ões' : ''}.
-                                    <br /><br />
-                                    Ao deletar este app, as transações associadas exibirão "Desconhecido" como app.
-                                    <br /><br />
-                                    Tem certeza que deseja continuar?
-                                </>
-                            ) : (
-                                `Tem certeza que deseja deletar o app "${rideAppToDelete?.name}"? Esta ação não pode ser desfeita.`
-                            )}
-                        </AlertDialogDescription>
-                    </AlertDialogHeader>
-                    <AlertDialogFooter>
-                        <AlertDialogCancel className="rounded-xl">Cancelar</AlertDialogCancel>
-                        <AlertDialogAction 
-                            onClick={confirmDeleteRideApp} 
-                            className="rounded-xl bg-error hover:bg-error/90"
-                        >
-                            Deletar
-                        </AlertDialogAction>
-                    </AlertDialogFooter>
-                </AlertDialogContent>
-            </AlertDialog>
-        </div>
+    const isDuplicate = rideApps.some(
+      (app: any) => app.name.trim().toLowerCase() === newRideApp.trim().toLowerCase()
     );
+
+    if (isDuplicate) {
+      toast({
+        title: "App de Corrida Duplicado",
+        description: "Este app de corrida já existe.",
+        variant: "destructive",
+      });
+      return;
+    }
+
+    try {
+      const newAppRef = doc(collection(firestore, 'rideApps'));
+      await setDoc(newAppRef, { id: newAppRef.id, name: newRideApp });
+      setNewRideApp('');
+      toast({ title: "App de Corrida Adicionado", description: `"${newRideApp}" foi adicionado.` });
+    } catch (e) {
+      console.error("Error adding ride app: ", e);
+      toast({ title: "Erro", description: "Não foi possível adicionar o app de corrida.", variant: "destructive" });
+    }
+  };
+
+  const handleDeleteRideApp = async (appId: string) => {
+    if (!firestore || !userId) return;
+
+    // First, check if ride app is being used
+    setIsCheckingUsage(true);
+    try {
+      const periodsSnapshot = await getDocs(collection(firestore, `users/${userId}/periods`));
+      let count = 0;
+
+      for (const periodDoc of periodsSnapshot.docs) {
+        const transactionsQuery = query(
+          collection(firestore, `users/${userId}/periods/${periodDoc.id}/transactions`),
+          where('categoryOrAppId', '==', appId),
+          where('type', '==', 'Revenue')
+        );
+        const transactionsSnapshot = await getDocs(transactionsQuery);
+        count += transactionsSnapshot.size;
+      }
+
+      setUsageCount(count);
+      const app = rideApps.find((a: RideApp) => a.id === appId);
+      setRideAppToDelete(app || null);
+    } catch (e) {
+      console.error('Error checking ride app usage:', e);
+      toast({
+        title: "Erro",
+        description: "Não foi possível verificar o uso do app de corrida.",
+        variant: "destructive"
+      });
+    } finally {
+      setIsCheckingUsage(false);
+    }
+  };
+
+  const confirmDeleteRideApp = async () => {
+    if (!firestore || !rideAppToDelete) return;
+
+    try {
+      const docRef = doc(firestore, 'rideApps', rideAppToDelete.id);
+      await deleteDoc(docRef);
+
+      // Notify parent component to update state
+      if (onRideAppDeleted) {
+        onRideAppDeleted(rideAppToDelete.id);
+      }
+
+      toast({
+        title: "App de Corrida Deletado",
+        description: `"${rideAppToDelete.name}" foi removido com sucesso.`
+      });
+    } catch (e: any) {
+      console.error("Error deleting ride app:", e);
+      toast({
+        title: "Erro",
+        description: `Não foi possível deletar: ${e.code || e.message}`,
+        variant: "destructive"
+      });
+    } finally {
+      setRideAppToDelete(null);
+      setUsageCount(0);
+    }
+  };
+
+  const handleActivateNewPeriod = async () => {
+    if (!startDate || !endDate || initialBalance === undefined || targetBalance === undefined || !firestore || !userId) {
+      toast({
+        title: "Campos Incompletos",
+        description: "Por favor, preencha todos os campos do período.",
+        variant: "destructive",
+      });
+      return;
+    }
+
+    setIsSavingPeriod(true);
+
+    try {
+      const batch = writeBatch(firestore);
+
+      // Deactivate all existing periods for the user
+      const periodsQuery = query(collection(firestore, `users/${userId}/periods`), where("isActive", "==", true));
+      const activePeriodsSnapshot = await getDocs(periodsQuery);
+      activePeriodsSnapshot.forEach(periodDoc => {
+        batch.update(periodDoc.ref, { isActive: false });
+      });
+
+      const newPeriodRef = doc(collection(firestore, `users/${userId}/periods`));
+
+      const startTimestamp = Timestamp.fromDate(new Date(`${startDate}T00:00:00`));
+      const endTimestamp = Timestamp.fromDate(new Date(`${endDate}T23:59:59`));
+
+      batch.set(newPeriodRef, {
+        id: newPeriodRef.id,
+        startDate: startTimestamp,
+        endDate: endTimestamp,
+        initialBalance: initialBalance,
+        targetBalance: targetBalance,
+        isActive: true,
+      });
+
+      await batch.commit();
+      toast({
+        title: "Período Ativado!",
+        description: "O novo período foi iniciado com sucesso."
+      });
+
+    } catch (e) {
+      console.error("Error activating new period: ", e);
+      toast({
+        title: "Erro ao Ativar Período",
+        description: "Ocorreu um erro ao salvar o novo período. Tente novamente.",
+        variant: "destructive",
+      });
+    } finally {
+      setIsSavingPeriod(false);
+    }
+  };
+
+  return (
+    <div className="space-y-6">
+      <Card className="rounded-2xl elevation-1">
+        <CardHeader>
+          <CardTitle>Aparência</CardTitle>
+          <CardDescription>Personalize a aparência da aplicação</CardDescription>
+        </CardHeader>
+        <CardContent>
+          <div className="flex items-center justify-between p-4 bg-accent rounded-xl">
+            <div className="flex items-center gap-4">
+              {theme === 'dark' ? (
+                <div className="p-3 rounded-full bg-primary/20">
+                  <Moon className="h-6 w-6 text-primary" />
+                </div>
+              ) : (
+                <div className="p-3 rounded-full bg-tertiary/20">
+                  <Sun className="h-6 w-6 text-tertiary" />
+                </div>
+              )}
+              <div>
+                <p className="font-medium text-lg">Tema {theme === 'dark' ? 'Escuro' : 'Claro'}</p>
+                <p className="text-sm text-muted-foreground">
+                  {theme === 'dark' ? 'Reduz o brilho da tela' : 'Interface com mais luz'}
+                </p>
+              </div>
+            </div>
+            <div className="flex items-center gap-4">
+              <Sun className="h-5 w-5 text-muted-foreground" />
+              <Switch
+                checked={theme === 'dark'}
+                onCheckedChange={(checked) => onThemeChange(checked ? 'dark' : 'light')}
+                className="scale-110"
+              />
+              <Moon className="h-5 w-5 text-muted-foreground" />
+            </div>
+          </div>
+        </CardContent>
+      </Card>
+
+      <Card className="rounded-2xl elevation-2">
+        <CardHeader>
+          <CardTitle>Configuração Período</CardTitle>
+          <CardDescription>{activePeriod ? 'Edite o período atual ou comece um novo.' : 'Defina um novo período para iniciar o rastreamento.'}</CardDescription>
+        </CardHeader>
+        <CardContent className="space-y-5">
+          <div className="space-y-2">
+            <Label htmlFor="startDate" className="text-base font-medium">Período</Label>
+            <div className="grid grid-cols-2 gap-4">
+              <Input id="startDate" type="date" value={startDate} onChange={(e) => setStartDate(e.target.value)} className="rounded-xl" />
+              <Input type="date" value={endDate} onChange={(e) => setEndDate(e.target.value)} className="rounded-xl" />
+            </div>
+          </div>
+          <div className="grid grid-cols-2 gap-4">
+            <div className="space-y-2">
+              <Label htmlFor="initialBalance" className="text-base font-medium">Saldo Inicial</Label>
+              <CurrencyInput id="initialBalance" value={initialBalance || 0} onValueChange={(value) => setInitialBalance(value)} className="rounded-xl" />
+            </div>
+            <div className="space-y-2">
+              <Label htmlFor="targetBalance" className="text-base font-medium">Objetivo do Período</Label>
+              <CurrencyInput id="targetBalance" value={targetBalance || 0} onValueChange={(value) => setTargetBalance(value)} className="rounded-xl" />
+            </div>
+          </div>
+          <Button onClick={handleActivateNewPeriod} disabled={isSavingPeriod} className="w-full rounded-xl py-6 gradient-primary elevation-2 hover:elevation-3 transition-all text-base">
+            {isSavingPeriod ? 'Salvando...' : (activePeriod ? 'Ativar Novo Período' : 'Ativar Período')}
+          </Button>
+          <p className="text-xs text-muted-foreground text-center">Nota: Ativar um novo período vai arquivar o atual.</p>
+        </CardContent>
+      </Card>
+
+      <div className="grid grid-cols-1 md:grid-cols-2 gap-6">
+        <Card className="rounded-2xl elevation-1">
+          <CardHeader>
+            <CardTitle>Categorias de Despesa</CardTitle>
+          </CardHeader>
+          <CardContent>
+            <div className="flex gap-3 mb-6">
+              <Input value={newCategory} onChange={e => setNewCategory(e.target.value)} placeholder="Nova Categoria" className="rounded-xl" />
+              <Button onClick={handleAddCategory} className="rounded-xl px-6">Add</Button>
+            </div>
+            <ul className="space-y-3">
+              {categories && categories.map((cat: Category) => (
+                <li key={cat.id} className="flex justify-between items-center p-3 bg-accent/50 rounded-xl group hover:bg-accent transition-all">
+                  <div className="flex items-center gap-3">
+                    <span className="font-medium">{cat.name}</span>
+                    {categoryUsageCounts[cat.id] > 0 && (
+                      <span className="text-xs bg-primary/20 text-primary px-2.5 py-1 rounded-full">
+                        {categoryUsageCounts[cat.id]} uso{categoryUsageCounts[cat.id] !== 1 ? 's' : ''}
+                      </span>
+                    )}
+                  </div>
+                  <Button
+                    variant="ghost"
+                    size="icon"
+                    onClick={() => handleDeleteCategory(cat.id)}
+                    disabled={isCheckingUsage}
+                    className="opacity-0 group-hover:opacity-100 transition-all hover:bg-error hover:text-error-foreground rounded-lg"
+                  >
+                    <Trash2 className="h-5 w-5" />
+                  </Button>
+                </li>
+              ))}
+            </ul>
+          </CardContent>
+        </Card>
+
+        <Card className="rounded-2xl elevation-1">
+          <CardHeader>
+            <CardTitle>Apps de Corrida</CardTitle>
+          </CardHeader>
+          <CardContent>
+            <div className="flex gap-3 mb-6">
+              <Input value={newRideApp} onChange={e => setNewRideApp(e.target.value)} placeholder="Novo App de Corrida" className="rounded-xl" />
+              <Button onClick={handleAddRideApp} className="rounded-xl px-6">Add</Button>
+            </div>
+            <ul className="space-y-3">
+              {rideApps && rideApps.map((app: RideApp) => (
+                <li key={app.id} className="flex justify-between items-center p-3 bg-accent/50 rounded-xl group hover:bg-accent transition-all">
+                  <div className="flex items-center gap-3">
+                    <span className="font-medium">{app.name}</span>
+                    {rideAppUsageCounts[app.id] > 0 && (
+                      <span className="text-xs bg-secondary/20 text-secondary px-2.5 py-1 rounded-full">
+                        {rideAppUsageCounts[app.id]} uso{rideAppUsageCounts[app.id] !== 1 ? 's' : ''}
+                      </span>
+                    )}
+                  </div>
+                  <Button
+                    variant="ghost"
+                    size="icon"
+                    onClick={() => handleDeleteRideApp(app.id)}
+                    disabled={isCheckingUsage}
+                    className="opacity-0 group-hover:opacity-100 transition-all hover:bg-error hover:text-error-foreground rounded-lg"
+                  >
+                    <Trash2 className="h-5 w-5" />
+                  </Button>
+                </li>
+              ))}
+            </ul>
+          </CardContent>
+        </Card>
+      </div>
+
+      {/* Confirmation Dialog for Category Deletion */}
+      <AlertDialog open={!!categoryToDelete} onOpenChange={() => setCategoryToDelete(null)}>
+        <AlertDialogContent className="rounded-2xl">
+          <AlertDialogHeader>
+            <AlertDialogTitle>Deletar Categoria?</AlertDialogTitle>
+            <AlertDialogDescription>
+              {usageCount > 0 ? (
+                <>
+                  <span className="text-warning font-semibold">Atenção:</span> A categoria "{categoryToDelete?.name}" está sendo usada em <span className="font-bold">{usageCount}</span> transação{usageCount !== 1 ? 'ões' : ''}.
+                  <br /><br />
+                  Ao deletar esta categoria, as transações associadas exibirão "Desconhecido" como categoria.
+                  <br /><br />
+                  Tem certeza que deseja continuar?
+                </>
+              ) : (
+                `Tem certeza que deseja deletar a categoria "${categoryToDelete?.name}"? Esta ação não pode ser desfeita.`
+              )}
+            </AlertDialogDescription>
+          </AlertDialogHeader>
+          <AlertDialogFooter>
+            <AlertDialogCancel className="rounded-xl">Cancelar</AlertDialogCancel>
+            <AlertDialogAction
+              onClick={confirmDeleteCategory}
+              className="rounded-xl bg-error hover:bg-error/90"
+            >
+              Deletar
+            </AlertDialogAction>
+          </AlertDialogFooter>
+        </AlertDialogContent>
+      </AlertDialog>
+
+      {/* Confirmation Dialog for RideApp Deletion */}
+      <AlertDialog open={!!rideAppToDelete} onOpenChange={() => setRideAppToDelete(null)}>
+        <AlertDialogContent className="rounded-2xl">
+          <AlertDialogHeader>
+            <AlertDialogTitle>Deletar App de Corrida?</AlertDialogTitle>
+            <AlertDialogDescription>
+              {usageCount > 0 ? (
+                <>
+                  <span className="text-warning font-semibold">Atenção:</span> O app "{rideAppToDelete?.name}" está sendo usado em <span className="font-bold">{usageCount}</span> transação{usageCount !== 1 ? 'ões' : ''}.
+                  <br /><br />
+                  Ao deletar este app, as transações associadas exibirão "Desconhecido" como app.
+                  <br /><br />
+                  Tem certeza que deseja continuar?
+                </>
+              ) : (
+                `Tem certeza que deseja deletar o app "${rideAppToDelete?.name}"? Esta ação não pode ser desfeita.`
+              )}
+            </AlertDialogDescription>
+          </AlertDialogHeader>
+          <AlertDialogFooter>
+            <AlertDialogCancel className="rounded-xl">Cancelar</AlertDialogCancel>
+            <AlertDialogAction
+              onClick={confirmDeleteRideApp}
+              className="rounded-xl bg-error hover:bg-error/90"
+            >
+              Deletar
+            </AlertDialogAction>
+          </AlertDialogFooter>
+        </AlertDialogContent>
+      </AlertDialog>
+    </div>
+  );
 };
 
 const History = ({ allPeriods, userId, categories, rideApps, onEditTransaction }: any) => {
-    const { firestore } = useFirebase();
-    const { toast } = useToast();
-    const [selectedPeriodId, setSelectedPeriodId] = useState('');
-    const [transactions, setTransactions] = useState<any[]>([]);
-    const [transactionToDelete, setTransactionToDelete] = useState<any>(null);
+  const { firestore } = useFirebase();
+  const { toast } = useToast();
+  const [selectedPeriodId, setSelectedPeriodId] = useState('');
+  const [transactions, setTransactions] = useState<any[]>([]);
+  const [transactionToDelete, setTransactionToDelete] = useState<any>(null);
 
-    useEffect(() => {
-        if (allPeriods && allPeriods.length > 0 && !selectedPeriodId) {
-            setSelectedPeriodId(allPeriods.find((p:any) => p.isActive)?.id || allPeriods[0].id);
-        }
-    }, [allPeriods, selectedPeriodId]);
+  useEffect(() => {
+    if (allPeriods && allPeriods.length > 0 && !selectedPeriodId) {
+      setSelectedPeriodId(allPeriods.find((p: any) => p.isActive)?.id || allPeriods[0].id);
+    }
+  }, [allPeriods, selectedPeriodId]);
 
-    useEffect(() => {
-        if (!selectedPeriodId || !firestore || !userId) {
-            setTransactions([]);
-            return;
-        }
+  useEffect(() => {
+    if (!selectedPeriodId || !firestore || !userId) {
+      setTransactions([]);
+      return;
+    }
 
-        const q = query(collection(firestore, `users/${userId}/periods/${selectedPeriodId}/transactions`), orderBy('timestamp', 'desc'));
-        const unsubscribe = onSnapshot(q, (querySnapshot) => {
-            const newTransactions: any[] = [];
-            querySnapshot.forEach((doc) => {
-                newTransactions.push({ id: doc.id, ...doc.data() });
-            });
-            setTransactions(newTransactions);
-        });
+    const q = query(collection(firestore, `users/${userId}/periods/${selectedPeriodId}/transactions`), orderBy('timestamp', 'desc'));
+    const unsubscribe = onSnapshot(q, (querySnapshot) => {
+      const newTransactions: any[] = [];
+      querySnapshot.forEach((doc) => {
+        newTransactions.push({ id: doc.id, ...doc.data() });
+      });
+      setTransactions(newTransactions);
+    });
 
-        return () => unsubscribe();
-    }, [selectedPeriodId, firestore, userId]);
+    return () => unsubscribe();
+  }, [selectedPeriodId, firestore, userId]);
 
-    const handleDeleteTransaction = async () => {
-        if (!transactionToDelete || !firestore || !userId) return;
-        try {
-            await deleteDoc(doc(firestore, `users/${userId}/periods/${transactionToDelete.periodId}/transactions`, transactionToDelete.id));
-            toast({
-                title: "Transação Deletada",
-                description: "A transação foi removida com sucesso.",
-            });
-        } catch (error) {
-            console.error("Error deleting transaction: ", error);
-            toast({
-                title: "Falha na Deleção",
-                description: "Não foi possível deletar a transação. Verifique as regras de segurança do Firestore.",
-                variant: "destructive",
-            });
-        } finally {
-            setTransactionToDelete(null);
-        }
+  const handleDeleteTransaction = async () => {
+    if (!transactionToDelete || !firestore || !userId) return;
+    try {
+      await deleteDoc(doc(firestore, `users/${userId}/periods/${transactionToDelete.periodId}/transactions`, transactionToDelete.id));
+      toast({
+        title: "Transação Deletada",
+        description: "A transação foi removida com sucesso.",
+      });
+    } catch (error) {
+      console.error("Error deleting transaction: ", error);
+      toast({
+        title: "Falha na Deleção",
+        description: "Não foi possível deletar a transação. Verifique as regras de segurança do Firestore.",
+        variant: "destructive",
+      });
+    } finally {
+      setTransactionToDelete(null);
+    }
+  };
+
+  const { expenseData, tripData } = useMemo(() => {
+    if (!transactions || !categories || !rideApps) return { expenseData: [], tripData: [] };
+
+    const expenseMap = new Map();
+    const tripMap = new Map();
+
+    transactions.forEach(t => {
+      if (t.type === 'Expense') {
+        const category = categories.find((c: any) => c.id === t.categoryOrAppId);
+        const categoryName = category ? category.name : 'Unknown';
+        expenseMap.set(categoryName, (expenseMap.get(categoryName) || 0) + t.amount);
+      } else if (t.type === 'Revenue') {
+        const app = rideApps.find((a: any) => a.id === t.categoryOrAppId);
+        const appName = app ? app.name : 'Unknown';
+        tripMap.set(appName, (tripMap.get(appName) || 0) + (t.tripCount || 1));
+      }
+    });
+
+    return {
+      expenseData: Array.from(expenseMap.entries()).map(([name, value]) => ({ name, value })),
+      tripData: Array.from(tripMap.entries()).map(([name, value]) => ({ name, value })),
     };
-    
-    const { expenseData, tripData } = useMemo(() => {
-        if (!transactions || !categories || !rideApps) return { expenseData: [], tripData: [] };
+  }, [transactions, categories, rideApps]);
 
-        const expenseMap = new Map();
-        const tripMap = new Map();
-
-        transactions.forEach(t => {
-            if (t.type === 'Expense') {
-                const category = categories.find((c: any) => c.id === t.categoryOrAppId);
-                const categoryName = category ? category.name : 'Unknown';
-                expenseMap.set(categoryName, (expenseMap.get(categoryName) || 0) + t.amount);
-            } else if (t.type === 'Revenue') {
-                const app = rideApps.find((a: any) => a.id === t.categoryOrAppId);
-                const appName = app ? app.name : 'Unknown';
-                tripMap.set(appName, (tripMap.get(appName) || 0) + (t.tripCount || 1));
-            }
-        });
-
-        return {
-            expenseData: Array.from(expenseMap.entries()).map(([name, value]) => ({ name, value })),
-            tripData: Array.from(tripMap.entries()).map(([name, value]) => ({ name, value })),
-        };
-    }, [transactions, categories, rideApps]);
-    
-    const COLORS = ['hsl(var(--chart-1))', 'hsl(var(--chart-2))', 'hsl(var(--chart-3))', 'hsl(var(--chart-4))', 'hsl(var(--chart-5))'];
+  const COLORS = ['hsl(var(--chart-1))', 'hsl(var(--chart-2))', 'hsl(var(--chart-3))', 'hsl(var(--chart-4))', 'hsl(var(--chart-5))'];
 
 
-    return (
-        <div className="space-y-6">
-             <Card className="rounded-2xl elevation-1">
-                <CardHeader>
-                    <CardTitle>Análise & Histórico</CardTitle>
-                    <CardDescription>Visualize suas transações e métricas</CardDescription>
-                </CardHeader>
-                <CardContent>
-                    <Select onValueChange={setSelectedPeriodId} value={selectedPeriodId}>
-                        <SelectTrigger className="rounded-xl">
-                            <SelectValue placeholder="Selecione um período" />
-                        </SelectTrigger>
-                        <SelectContent>
-                            {allPeriods && allPeriods.map((p: any) => (
-                                <SelectItem key={p.id} value={p.id}>
-                                    {new Date(p.startDate?.toDate()).toLocaleDateString()} - {new Date(p.endDate?.toDate()).toLocaleDateString()} {p.isActive && '(Ativo)'}
-                                </SelectItem>
-                            ))}
-                        </SelectContent>
-                    </Select>
-                </CardContent>
-            </Card>
+  return (
+    <div className="space-y-6">
+      <Card className="rounded-2xl elevation-1">
+        <CardHeader>
+          <CardTitle>Análise & Histórico</CardTitle>
+          <CardDescription>Visualize suas transações e métricas</CardDescription>
+        </CardHeader>
+        <CardContent>
+          <Select onValueChange={setSelectedPeriodId} value={selectedPeriodId}>
+            <SelectTrigger className="rounded-xl">
+              <SelectValue placeholder="Selecione um período" />
+            </SelectTrigger>
+            <SelectContent>
+              {allPeriods && allPeriods.map((p: any) => (
+                <SelectItem key={p.id} value={p.id}>
+                  {new Date(p.startDate?.toDate()).toLocaleDateString()} - {new Date(p.endDate?.toDate()).toLocaleDateString()} {p.isActive && '(Ativo)'}
+                </SelectItem>
+              ))}
+            </SelectContent>
+          </Select>
+        </CardContent>
+      </Card>
 
-            <div className="grid grid-cols-1 lg:grid-cols-2 gap-6">
-                <Card className="rounded-2xl elevation-1">
-                    <CardHeader><CardTitle className="text-lg">Detalhamento Despesa</CardTitle></CardHeader>
-                    <CardContent>
-                        {expenseData.length > 0 ? (
-                            <ResponsiveContainer width="100%" height={300}>
-                                <PieChart>
-                                    <Pie data={expenseData} dataKey="value" nameKey="name" cx="50%" cy="50%" outerRadius={100} fill="#8884d8" label>
-                                        {expenseData.map((entry, index) => (
-                                          <Cell key={`cell-${index}`} fill={COLORS[index % COLORS.length]} />
-                                        ))}
-                                    </Pie>
-                                    <Tooltip formatter={(value:any) => formatCurrency(value)} />
-                                </PieChart>
-                            </ResponsiveContainer>
-                        ) : <p className="text-center text-muted-foreground py-8">Nenhuma despesa no período.</p>}
-                    </CardContent>
-                </Card>
-                <Card className="rounded-2xl elevation-1">
-                    <CardHeader><CardTitle className="text-lg">Detalhamento Corridas</CardTitle></CardHeader>
-                    <CardContent>
-                        {tripData.length > 0 ? (
-                           <ResponsiveContainer width="100%" height={300}>
-                                <BarChart data={tripData}>
-                                    <XAxis dataKey="name" />
-                                    <YAxis />
-                                    <Tooltip />
-                                    <Bar dataKey="value" fill="hsl(var(--secondary))" name="Trips" radius={[4, 4, 0, 0]} />
-                                </BarChart>
-                            </ResponsiveContainer>
-                        ) : <p className="text-center text-muted-foreground py-8">Nenhuma corrida no período.</p>}
-                    </CardContent>
-                </Card>
-            </div>
-            
-            <Card className="rounded-2xl elevation-1">
-                <CardHeader><CardTitle className="text-lg">Lançamentos</CardTitle></CardHeader>
-                <CardContent>
-                    <div className="space-y-3">
-                        {transactions && transactions.map(t => {
-                            const detailName = t.type === 'Revenue'
-                                ? rideApps.find((app: RideApp) => app.id === t.categoryOrAppId)?.name
-                                : categories.find((cat: Category) => cat.id === t.categoryOrAppId)?.name;
-                            
-                            const fullDescription = t.type === 'Expense' 
-                                ? `${detailName || 'Desconhecido'} - ${t.description}` 
-                                : detailName || 'Desconhecido';
+      <div className="grid grid-cols-1 lg:grid-cols-2 gap-6">
+        <Card className="rounded-2xl elevation-1">
+          <CardHeader><CardTitle className="text-lg">Detalhamento Despesa</CardTitle></CardHeader>
+          <CardContent>
+            {expenseData.length > 0 ? (
+              <ResponsiveContainer width="100%" height={300}>
+                <PieChart>
+                  <Pie data={expenseData} dataKey="value" nameKey="name" cx="50%" cy="50%" outerRadius={100} fill="#8884d8" label>
+                    {expenseData.map((entry, index) => (
+                      <Cell key={`cell-${index}`} fill={COLORS[index % COLORS.length]} />
+                    ))}
+                  </Pie>
+                  <Tooltip formatter={(value: any) => formatCurrency(value)} />
+                </PieChart>
+              </ResponsiveContainer>
+            ) : <p className="text-center text-muted-foreground py-8">Nenhuma despesa no período.</p>}
+          </CardContent>
+        </Card>
+        <Card className="rounded-2xl elevation-1">
+          <CardHeader><CardTitle className="text-lg">Detalhamento Corridas</CardTitle></CardHeader>
+          <CardContent>
+            {tripData.length > 0 ? (
+              <ResponsiveContainer width="100%" height={300}>
+                <BarChart data={tripData}>
+                  <XAxis dataKey="name" />
+                  <YAxis />
+                  <Tooltip />
+                  <Bar dataKey="value" fill="hsl(var(--secondary))" name="Trips" radius={[4, 4, 0, 0]} />
+                </BarChart>
+              </ResponsiveContainer>
+            ) : <p className="text-center text-muted-foreground py-8">Nenhuma corrida no período.</p>}
+          </CardContent>
+        </Card>
+      </div>
 
-                            return (
-                                <div key={t.id} className="flex justify-between items-center p-4 bg-accent/50 rounded-xl hover:bg-accent transition-all">
-                                    <div className="flex-1">
-                                        <div className="flex items-center gap-3 mb-1">
-                                            {t.type === 'Revenue' ? (
-                                                <div className="p-2 rounded-full bg-success/20">
-                                                    <PlusCircle className="h-5 w-5 text-success" />
-                                                </div>
-                                            ) : (
-                                                <div className="p-2 rounded-full bg-error/20">
-                                                    <MinusCircle className="h-5 w-5 text-error" />
-                                                </div>
-                                            )}
-                                            <p className={`font-bold text-lg ${t.type === 'Revenue' ? 'text-success' : 'text-error'}`}>
-                                                {t.type === 'Revenue' ? `+ ${formatCurrency(t.amount)}` : `- ${formatCurrency(t.amount)}`}
-                                            </p>
-                                        </div>
-                                        <p className="text-sm text-foreground ml-8">{fullDescription}</p>
-                                        <p className="text-xs text-muted-foreground ml-8">{t.timestamp?.toDate().toLocaleDateString('pt-BR')} às {t.timestamp?.toDate().toLocaleTimeString('pt-BR', { hour: '2-digit', minute: '2-digit' })}</p>
-                                    </div>
-                                    <DropdownMenu>
-                                        <DropdownMenuTrigger asChild>
-                                            <Button variant="ghost" size="icon"><MoreVertical className="h-4 w-4"/></Button>
-                                        </DropdownMenuTrigger>
-                                        <DropdownMenuContent align="end">
-                                            <DropdownMenuItem onClick={() => onEditTransaction(t)}>
-                                                <Edit className="mr-2 h-4 w-4" />
-                                                <span>Editar</span>
-                                            </DropdownMenuItem>
-                                            <DropdownMenuItem onClick={() => setTransactionToDelete(t)} className="text-destructive focus:text-destructive">
-                                                <Trash2 className="mr-2 h-4 w-4" />
-                                                <span>Deletar</span>
-                                            </DropdownMenuItem>
-                                        </DropdownMenuContent>
-                                    </DropdownMenu>
-                                </div>
-                            );
-                        })}
+      <Card className="rounded-2xl elevation-1">
+        <CardHeader><CardTitle className="text-lg">Lançamentos</CardTitle></CardHeader>
+        <CardContent>
+          <div className="space-y-3">
+            {transactions && transactions.map(t => {
+              const detailName = t.type === 'Revenue'
+                ? rideApps.find((app: RideApp) => app.id === t.categoryOrAppId)?.name
+                : categories.find((cat: Category) => cat.id === t.categoryOrAppId)?.name;
+
+              const fullDescription = t.type === 'Expense'
+                ? `${detailName || 'Desconhecido'} - ${t.description}`
+                : detailName || 'Desconhecido';
+
+              return (
+                <div key={t.id} className="flex justify-between items-center p-4 bg-accent/50 rounded-xl hover:bg-accent transition-all">
+                  <div className="flex-1">
+                    <div className="flex items-center gap-3 mb-1">
+                      {t.type === 'Revenue' ? (
+                        <div className="p-2 rounded-full bg-success/20">
+                          <PlusCircle className="h-5 w-5 text-success" />
+                        </div>
+                      ) : (
+                        <div className="p-2 rounded-full bg-error/20">
+                          <MinusCircle className="h-5 w-5 text-error" />
+                        </div>
+                      )}
+                      <p className={`font-bold text-lg ${t.type === 'Revenue' ? 'text-success' : 'text-error'}`}>
+                        {t.type === 'Revenue' ? `+ ${formatCurrency(t.amount)}` : `- ${formatCurrency(t.amount)}`}
+                      </p>
                     </div>
-                </CardContent>
-            </Card>
+                    <p className="text-sm text-foreground ml-8">{fullDescription}</p>
+                    <p className="text-xs text-muted-foreground ml-8">{t.timestamp?.toDate().toLocaleDateString('pt-BR')} às {t.timestamp?.toDate().toLocaleTimeString('pt-BR', { hour: '2-digit', minute: '2-digit' })}</p>
+                  </div>
+                  <DropdownMenu>
+                    <DropdownMenuTrigger asChild>
+                      <Button variant="ghost" size="icon"><MoreVertical className="h-4 w-4" /></Button>
+                    </DropdownMenuTrigger>
+                    <DropdownMenuContent align="end">
+                      <DropdownMenuItem onClick={() => onEditTransaction(t)}>
+                        <Edit className="mr-2 h-4 w-4" />
+                        <span>Editar</span>
+                      </DropdownMenuItem>
+                      <DropdownMenuItem onClick={() => setTransactionToDelete(t)} className="text-destructive focus:text-destructive">
+                        <Trash2 className="mr-2 h-4 w-4" />
+                        <span>Deletar</span>
+                      </DropdownMenuItem>
+                    </DropdownMenuContent>
+                  </DropdownMenu>
+                </div>
+              );
+            })}
+          </div>
+        </CardContent>
+      </Card>
 
-            <AlertDialog open={!!transactionToDelete} onOpenChange={() => setTransactionToDelete(null)}>
-                <AlertDialogContent className="rounded-2xl">
-                    <AlertDialogHeader>
-                        <AlertDialogTitle>Deletar Transação?</AlertDialogTitle>
-                        <AlertDialogDescription>
-                            Essa ação não pode ser desfeita. Isso irá apagar definitivamente a transação.
-                        </AlertDialogDescription>
-                    </AlertDialogHeader>
-                    <AlertDialogFooter>
-                        <AlertDialogCancel className="rounded-xl">Cancelar</AlertDialogCancel>
-                        <AlertDialogAction onClick={handleDeleteTransaction} className="rounded-xl bg-error hover:bg-error/90">Deletar</AlertDialogAction>
-                    </AlertDialogFooter>
-                </AlertDialogContent>
-            </AlertDialog>
-        </div>
-    );
+      <AlertDialog open={!!transactionToDelete} onOpenChange={() => setTransactionToDelete(null)}>
+        <AlertDialogContent className="rounded-2xl">
+          <AlertDialogHeader>
+            <AlertDialogTitle>Deletar Transação?</AlertDialogTitle>
+            <AlertDialogDescription>
+              Essa ação não pode ser desfeita. Isso irá apagar definitivamente a transação.
+            </AlertDialogDescription>
+          </AlertDialogHeader>
+          <AlertDialogFooter>
+            <AlertDialogCancel className="rounded-xl">Cancelar</AlertDialogCancel>
+            <AlertDialogAction onClick={handleDeleteTransaction} className="rounded-xl bg-error hover:bg-error/90">Deletar</AlertDialogAction>
+          </AlertDialogFooter>
+        </AlertDialogContent>
+      </AlertDialog>
+    </div>
+  );
 };
 
 const ForgotPasswordDialog = ({ isOpen, onOpenChange, onSendResetEmail }: { isOpen: boolean, onOpenChange: (open: boolean) => void, onSendResetEmail: (email: string) => void }) => {
-    const [email, setEmail] = useState('');
+  const [email, setEmail] = useState('');
 
-    const handleSendClick = () => {
-        onSendResetEmail(email);
-    };
+  const handleSendClick = () => {
+    onSendResetEmail(email);
+  };
 
-    return (
-        <Dialog open={isOpen} onOpenChange={onOpenChange}>
-            <DialogContent className="rounded-2xl">
-                <DialogHeader>
-                    <DialogTitle>Recuperar Senha</DialogTitle>
-                    <DialogDescription>
-                        Digite seu e-mail e enviaremos um link para redefinir sua senha.
-                    </DialogDescription>
-                </DialogHeader>
-                <div className="space-y-4 py-2 pb-4">
-                    <div className="space-y-2">
-                        <Label htmlFor="email">E-mail</Label>
-                        <Input
-                            id="email"
-                            type="email"
-                            placeholder="seu@email.com"
-                            value={email}
-                            onChange={(e) => setEmail(e.target.value)}
-                            className="rounded-xl"
-                        />
-                    </div>
-                </div>
-                <DialogFooter>
-                    <Button variant="outline" onClick={() => onOpenChange(false)} className="rounded-xl">Cancelar</Button>
-                    <Button onClick={handleSendClick} className="rounded-xl gradient-primary">Enviar Link</Button>
-                </DialogFooter>
-            </DialogContent>
-        </Dialog>
-    );
+  return (
+    <Dialog open={isOpen} onOpenChange={onOpenChange}>
+      <DialogContent className="rounded-2xl">
+        <DialogHeader>
+          <DialogTitle>Recuperar Senha</DialogTitle>
+          <DialogDescription>
+            Digite seu e-mail e enviaremos um link para redefinir sua senha.
+          </DialogDescription>
+        </DialogHeader>
+        <div className="space-y-4 py-2 pb-4">
+          <div className="space-y-2">
+            <Label htmlFor="email">E-mail</Label>
+            <Input
+              id="email"
+              type="email"
+              placeholder="seu@email.com"
+              value={email}
+              onChange={(e) => setEmail(e.target.value)}
+              className="rounded-xl"
+            />
+          </div>
+        </div>
+        <DialogFooter>
+          <Button variant="outline" onClick={() => onOpenChange(false)} className="rounded-xl">Cancelar</Button>
+          <Button onClick={handleSendClick} className="rounded-xl gradient-primary">Enviar Link</Button>
+        </DialogFooter>
+      </DialogContent>
+    </Dialog>
+  );
 };
 
 const LoginScreen = () => {
@@ -1015,30 +1015,30 @@ const LoginScreen = () => {
       }
     }
   };
-  
+
   const handlePasswordReset = async (resetEmail: string) => {
     if (!auth || !resetEmail) {
-        toast({
-            title: "Email Necessário",
-            description: "Por favor, digite seu endereço de e-mail.",
-            variant: "destructive",
-        });
-        return;
+      toast({
+        title: "Email Necessário",
+        description: "Por favor, digite seu endereço de e-mail.",
+        variant: "destructive",
+      });
+      return;
     }
     try {
-        await sendPasswordResetEmail(auth, resetEmail);
-        toast({
-            title: "Link Enviado",
-            description: "Verifique sua caixa de entrada para o link de redefinição de senha.",
-        });
-        setIsForgotPasswordOpen(false);
+      await sendPasswordResetEmail(auth, resetEmail);
+      toast({
+        title: "Link Enviado",
+        description: "Verifique sua caixa de entrada para o link de redefinição de senha.",
+      });
+      setIsForgotPasswordOpen(false);
     } catch (e: any) {
-        toast({
-            title: "Erro",
-            description: e.message,
-            variant: "destructive",
-        });
-        console.error("Password reset error:", e);
+      toast({
+        title: "Erro",
+        description: e.message,
+        variant: "destructive",
+      });
+      console.error("Password reset error:", e);
     }
   };
 
@@ -1049,14 +1049,14 @@ const LoginScreen = () => {
         <div className="w-full max-w-sm">
           <div className="mb-8 text-center">
             <div className="inline-flex items-center justify-center w-20 h-20 rounded-full gradient-primary elevation-3 mb-4">
-              <DriveWiseIcon className="h-10 w-10 text-primary-foreground" />
+              <img src="/icon.png" alt="DriveWise" className="h-12 w-12 rounded-full" />
             </div>
             <h1 className="text-3xl font-bold mb-2">DriveWise</h1>
             <p className="text-muted-foreground">
               {isSignUp ? 'Crie sua conta para começar' : 'Faça login para acompanhar suas viagens e finanças'}
             </p>
           </div>
-          
+
           <Card className="rounded-2xl elevation-2">
             <CardHeader>
               <CardTitle className="text-2xl text-center">{isSignUp ? 'Criar Conta' : 'Bem vindo de Volta'}</CardTitle>
@@ -1068,11 +1068,11 @@ const LoginScreen = () => {
               {error && <div className="p-3 bg-error/10 text-error rounded-xl text-sm text-center">{error}</div>}
               <Input type="email" placeholder="E-mail" value={email} onChange={(e) => setEmail(e.target.value)} className="rounded-xl" />
               <div className="relative">
-                <Input 
+                <Input
                   type={showPassword ? 'text' : 'password'}
-                  placeholder="Senha" 
-                  value={password} 
-                  onChange={(e) => setPassword(e.target.value)} 
+                  placeholder="Senha"
+                  value={password}
+                  onChange={(e) => setPassword(e.target.value)}
                   className="rounded-xl pr-10"
                 />
                 <Button
@@ -1110,8 +1110,8 @@ const LoginScreen = () => {
               </Button>
 
               {!isSignUp && (
-                 <Button variant="link" onClick={() => setIsForgotPasswordOpen(true)} className="w-full text-sm">
-                    Esqueci minha senha
+                <Button variant="link" onClick={() => setIsForgotPasswordOpen(true)} className="w-full text-sm">
+                  Esqueci minha senha
                 </Button>
               )}
 
@@ -1124,7 +1124,7 @@ const LoginScreen = () => {
           </Card>
         </div>
       </div>
-      <ForgotPasswordDialog 
+      <ForgotPasswordDialog
         isOpen={isForgotPasswordOpen}
         onOpenChange={setIsForgotPasswordOpen}
         onSendResetEmail={handlePasswordReset}
@@ -1141,14 +1141,14 @@ export default function IDriveApp() {
   const { user, isUserLoading } = useUser();
   const { theme, setTheme } = useTheme();
   const [view, setView] = useState('Home');
-  
+
   const [categories, setCategories] = useState<any[]>([]);
   const [rideApps, setRideApps] = useState<any[]>([]);
-  
+
   const [activePeriod, setActivePeriod] = useState<any>(null);
   const [allPeriods, setAllPeriods] = useState<any[]>([]);
   const [transactions, setTransactions] = useState<any[]>([]);
-  
+
   const [isTransactionModalOpen, setTransactionModalOpen] = useState(false);
   const [transactionToEdit, setTransactionToEdit] = useState<any>(null);
   const [newTransactionType, setNewTransactionType] = useState<'Revenue' | 'Expense' | null>(null);
@@ -1158,13 +1158,13 @@ export default function IDriveApp() {
     setNewTransactionType(type);
     setTransactionModalOpen(true);
   };
-  
+
   const handleEditTransaction = (transaction: any) => {
     setNewTransactionType(null);
     setTransactionToEdit(transaction);
     setTransactionModalOpen(true);
   };
-  
+
   const handleCloseTransactionModal = () => {
     setTransactionModalOpen(false);
     setTransactionToEdit(null);
@@ -1176,15 +1176,15 @@ export default function IDriveApp() {
       signOut(auth);
     }
   };
-  
+
   const handleThemeChange = (newTheme: Theme) => {
     setTheme(newTheme);
   };
-  
+
   // Fetch settings (Categories and RideApps)
   useEffect(() => {
     if (!firestore) return;
-    
+
     const catUnsub = onSnapshot(
       collection(firestore, 'categories'),
       (snapshot) => {
@@ -1200,7 +1200,7 @@ export default function IDriveApp() {
         console.error('Error fetching categories:', error);
       }
     );
-    
+
     const appUnsub = onSnapshot(
       collection(firestore, 'rideApps'),
       (snapshot) => {
@@ -1216,7 +1216,7 @@ export default function IDriveApp() {
         console.error('Error fetching ride apps:', error);
       }
     );
-    
+
     return () => {
       catUnsub();
       appUnsub();
@@ -1226,18 +1226,18 @@ export default function IDriveApp() {
   // Fetch all periods for the current user
   useEffect(() => {
     if (!firestore || !user) {
-        setAllPeriods([]);
-        setActivePeriod(null);
-        return;
+      setAllPeriods([]);
+      setActivePeriod(null);
+      return;
     };
     const periodsRef = collection(firestore, `users/${user.uid}/periods`);
     const q = query(periodsRef, orderBy('startDate', 'desc'));
     const unsub = onSnapshot(q, (snapshot) => {
-        const periodsData: any[] = [];
-        snapshot.forEach(doc => periodsData.push({ id: doc.id, ...doc.data() }));
-        setAllPeriods(periodsData);
-        const active = periodsData.find(p => p.isActive);
-        setActivePeriod(active);
+      const periodsData: any[] = [];
+      snapshot.forEach(doc => periodsData.push({ id: doc.id, ...doc.data() }));
+      setAllPeriods(periodsData);
+      const active = periodsData.find(p => p.isActive);
+      setActivePeriod(active);
     });
     return () => unsub();
   }, [firestore, user]);
@@ -1245,8 +1245,8 @@ export default function IDriveApp() {
   // Fetch transactions for active period
   useEffect(() => {
     if (!activePeriod || !firestore || !user) {
-        setTransactions([]);
-        return;
+      setTransactions([]);
+      return;
     };
 
     const q = query(collection(firestore, `users/${user.uid}/periods/${activePeriod.id}/transactions`), orderBy('timestamp', 'desc'));
@@ -1260,37 +1260,37 @@ export default function IDriveApp() {
 
     return () => unsubscribe();
   }, [activePeriod, firestore, user]);
-  
+
   if (isUserLoading) {
-      return (
-        <div className="min-h-screen bg-background text-foreground dark flex items-center justify-center">
-            <div>Loading...</div>
-        </div>
-      )
+    return (
+      <div className="min-h-screen bg-background text-foreground dark flex items-center justify-center">
+        <div>Loading...</div>
+      </div>
+    )
   }
 
   if (!user) {
-      return (
-         <div className="min-h-screen bg-background text-foreground dark">
-            <LoginScreen />
-         </div>
-      )
+    return (
+      <div className="min-h-screen bg-background text-foreground dark">
+        <LoginScreen />
+      </div>
+    )
   }
 
   const renderView = () => {
     switch (view) {
       case 'Home':
-        return <Dashboard 
-            transactions={transactions} 
-            activePeriod={activePeriod}
-            onOpenRevenue={() => handleOpenNewTransaction('Revenue')}
-            onOpenExpense={() => handleOpenNewTransaction('Expense')}
+        return <Dashboard
+          transactions={transactions}
+          activePeriod={activePeriod}
+          onOpenRevenue={() => handleOpenNewTransaction('Revenue')}
+          onOpenExpense={() => handleOpenNewTransaction('Expense')}
         />;
       case 'Settings':
-        return <Settings 
-          categories={categories} 
-          rideApps={rideApps} 
-          activePeriod={activePeriod} 
+        return <Settings
+          categories={categories}
+          rideApps={rideApps}
+          activePeriod={activePeriod}
           userId={user.uid}
           onCategoryDeleted={(id: string) => setCategories(prev => prev.filter(cat => cat.id !== id))}
           onRideAppDeleted={(id: string) => setRideApps(prev => prev.filter(app => app.id !== id))}
@@ -1298,15 +1298,15 @@ export default function IDriveApp() {
           onThemeChange={handleThemeChange}
         />;
       case 'History':
-        return <History 
-            allPeriods={allPeriods} 
-            userId={user.uid} 
-            categories={categories} 
-            rideApps={rideApps}
-            onEditTransaction={handleEditTransaction}
+        return <History
+          allPeriods={allPeriods}
+          userId={user.uid}
+          categories={categories}
+          rideApps={rideApps}
+          onEditTransaction={handleEditTransaction}
         />;
       default:
-        return <Dashboard transactions={[]} activePeriod={null} onOpenRevenue={() => {}} onOpenExpense={() => {}} />;
+        return <Dashboard transactions={[]} activePeriod={null} onOpenRevenue={() => { }} onOpenExpense={() => { }} />;
     }
   };
 
@@ -1333,57 +1333,57 @@ export default function IDriveApp() {
                 <Moon className="h-5 w-5" />
               )}
             </Button>
-            
+
             {/* User Menu */}
             <DropdownMenu>
-            <DropdownMenuTrigger asChild>
+              <DropdownMenuTrigger asChild>
                 <Button variant="ghost" className="relative h-10 w-10 rounded-full">
-                    <Avatar className="h-10 w-10">
-                        <AvatarImage src={user.photoURL || undefined} alt={user.displayName || 'User'} />
-                        <AvatarFallback><UserIcon/></AvatarFallback>
-                    </Avatar>
+                  <Avatar className="h-10 w-10">
+                    <AvatarImage src={user.photoURL || undefined} alt={user.displayName || 'User'} />
+                    <AvatarFallback><UserIcon /></AvatarFallback>
+                  </Avatar>
                 </Button>
-            </DropdownMenuTrigger>
-            <DropdownMenuContent className="w-56" align="end" forceMount>
+              </DropdownMenuTrigger>
+              <DropdownMenuContent className="w-56" align="end" forceMount>
                 <DropdownMenuLabel className="font-normal">
-                <div className="flex flex-col space-y-1">
+                  <div className="flex flex-col space-y-1">
                     <p className="text-sm font-medium leading-none">{user.displayName || user.email}</p>
                     {user.displayName && <p className="text-xs leading-none text-muted-foreground">
-                    {user.email}
+                      {user.email}
                     </p>}
-                </div>
+                  </div>
                 </DropdownMenuLabel>
                 <DropdownMenuSeparator />
                 <DropdownMenuItem onClick={handleSignOut}>
-                    <LogOut className="mr-2 h-4 w-4" />
-                    <span>Log out</span>
+                  <LogOut className="mr-2 h-4 w-4" />
+                  <span>Log out</span>
                 </DropdownMenuItem>
-            </DropdownMenuContent>
-        </DropdownMenu>
+              </DropdownMenuContent>
+            </DropdownMenu>
           </div>
         </header>
         {renderView()}
         <nav className="fixed bottom-0 left-0 right-0 bg-card border-t border-border flex justify-around p-2">
-            <Button variant={view === 'Home' ? "secondary" : "ghost"} onClick={() => setView('Home')} className="flex flex-col h-auto">
-                <DriveWiseIcon className="h-6 w-6"/>
-                <span>Principal</span>
-            </Button>
-            <Button variant={view === 'Settings' ? "secondary" : "ghost"} onClick={() => setView('Settings')} className="flex flex-col h-auto">
-                <SettingsIcon/>
-                <span>Configurações</span>
-            </Button>
-            <Button variant={view === 'History' ? "secondary" : "ghost"} onClick={() => setView('History')} className="flex flex-col h-auto">
-                <HistoryIcon/>
-                <span>Histórico</span>
-            </Button>
+          <Button variant={view === 'Home' ? "secondary" : "ghost"} onClick={() => setView('Home')} className="flex flex-col h-auto">
+            <DriveWiseIcon className="h-6 w-6" />
+            <span>Principal</span>
+          </Button>
+          <Button variant={view === 'Settings' ? "secondary" : "ghost"} onClick={() => setView('Settings')} className="flex flex-col h-auto">
+            <SettingsIcon />
+            <span>Configurações</span>
+          </Button>
+          <Button variant={view === 'History' ? "secondary" : "ghost"} onClick={() => setView('History')} className="flex flex-col h-auto">
+            <HistoryIcon />
+            <span>Histórico</span>
+          </Button>
         </nav>
         <div className="pb-20"></div> {/* padding for bottom nav */}
       </div>
-      
+
       {isTransactionModalOpen && (
-        <TransactionModal 
-          isOpen={isTransactionModalOpen} 
-          onClose={handleCloseTransactionModal} 
+        <TransactionModal
+          isOpen={isTransactionModalOpen}
+          onClose={handleCloseTransactionModal}
           transaction={transactionToEdit}
           periodId={activePeriod?.id}
           userId={user.uid}
@@ -1396,6 +1396,6 @@ export default function IDriveApp() {
   );
 }
 
-    
 
-    
+
+
